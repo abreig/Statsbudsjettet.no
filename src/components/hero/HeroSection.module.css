@@ -1,0 +1,70 @@
+.hero {
+  padding: var(--space-12) 0 var(--space-8);
+  text-align: center;
+}
+
+.aarstall {
+  font-family: var(--font-tall);
+  font-size: var(--tekst-xl);
+  color: var(--reg-blaa);
+  font-weight: var(--vekt-medium);
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-2);
+}
+
+.tittel {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-5xl);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+  margin-bottom: var(--space-3);
+  line-height: var(--linjehoyde-tett);
+}
+
+.undertittel {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-xl);
+  color: var(--tekst-sekundaer);
+  margin-bottom: var(--space-8);
+}
+
+.nokkeltall {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.nokkeltallItem {
+  text-align: center;
+}
+
+.nokkeltallVerdi {
+  font-family: var(--font-tall);
+  font-size: var(--tekst-3xl);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+  line-height: var(--linjehoyde-tett);
+}
+
+.nokkeltallEtikett {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  color: var(--tekst-sekundaer);
+  margin-top: var(--space-1);
+}
+
+@media (max-width: 640px) {
+  .tittel {
+    font-size: var(--tekst-3xl);
+  }
+
+  .nokkeltall {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .nokkeltallVerdi {
+    font-size: var(--tekst-2xl);
+  }
+}

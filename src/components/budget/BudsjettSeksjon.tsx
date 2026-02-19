@@ -9,9 +9,11 @@ import { useDrillDown } from "@/components/data/hooks/useDrillDown";
 interface BudsjettSeksjonProps {
   data: AggregertBudsjett;
   aar: number;
+  overskrift?: string;
+  forklaringstekst?: string;
 }
 
-export default function BudsjettSeksjon({ data, aar }: BudsjettSeksjonProps) {
+export default function BudsjettSeksjon({ data, aar, overskrift, forklaringstekst }: BudsjettSeksjonProps) {
   const [visEndring, setVisEndring] = useState(false);
   const [drillDown, setDrillDown] = useState<{
     side: "utgift" | "inntekt";
@@ -44,12 +46,28 @@ export default function BudsjettSeksjon({ data, aar }: BudsjettSeksjonProps) {
           fontFamily: "var(--font-serif)",
           fontSize: "var(--tekst-3xl)",
           color: "var(--reg-marine)",
-          marginBottom: "var(--space-5)",
+          marginBottom: "var(--space-3)",
           textAlign: "center",
         }}
       >
-        Budsjettet i tall
+        {overskrift ?? "Budsjettet i tall"}
       </h2>
+
+      {forklaringstekst && (
+        <p
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "var(--tekst-base)",
+            color: "var(--tekst-sekundaer)",
+            textAlign: "center",
+            maxWidth: "40rem",
+            margin: "0 auto var(--space-5)",
+            lineHeight: "var(--linjehoyde-normal)",
+          }}
+        >
+          {forklaringstekst}
+        </p>
+      )}
 
       <StackedBarChart
         utgifter={data.utgifter_aggregert}
