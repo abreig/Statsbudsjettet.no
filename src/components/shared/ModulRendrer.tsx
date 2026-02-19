@@ -1,10 +1,12 @@
 "use client";
 
+import { useRef, useCallback } from "react";
 import type { ModulKonfigurasjon, AggregertBudsjett, BudgetYear } from "@/components/data/types/budget";
 import type { CMSTema } from "@/lib/mock-cms";
 import HeroSection from "@/components/hero/HeroSection";
 import PlanSection from "@/components/plan/PlanSection";
 import BudsjettSeksjon from "@/components/budget/BudsjettSeksjon";
+import type { BudsjettSeksjonHandle } from "@/components/budget/BudsjettSeksjon";
 import Nokkeltall from "@/components/shared/Nokkeltall";
 import EgendefinertTekst from "@/components/shared/EgendefinertTekst";
 
@@ -20,6 +22,8 @@ interface ModulRendrerProps {
  * ModulRendrer — kjernekomponent for modulbasert komposisjon.
  * Filtrerer på synlighet, sorterer etter rekkefølge, og mapper
  * modultype til React-komponent.
+ *
+ * Kobler PlanSection → BudsjettSeksjon via ref for budsjettnavigasjon.
  */
 export default function ModulRendrer({
   moduler,
@@ -28,6 +32,12 @@ export default function ModulRendrer({
   fullData,
   temaer,
 }: ModulRendrerProps) {
+  const budsjettRef = useRef<BudsjettSeksjonHandle>(null);
+
+  const handleBudsjettNavigasjon = useCallback((omrNr: number) => {
+    budsjettRef.current?.openDrillDown("utgift", omrNr);
+  }, []);
+
   const synligeModuler = moduler
     .filter((m) => m.synlig)
     .sort((a, b) => a.rekkefolge - b.rekkefolge);
@@ -42,6 +52,8 @@ export default function ModulRendrer({
           aggregertData={aggregertData}
           fullData={fullData}
           temaer={temaer}
+          budsjettRef={budsjettRef}
+          onBudsjettNavigasjon={handleBudsjettNavigasjon}
         />
       ))}
     </>
@@ -54,12 +66,16 @@ function ModulKomponent({
   aggregertData,
   fullData,
   temaer,
+  budsjettRef,
+  onBudsjettNavigasjon,
 }: {
   modul: ModulKonfigurasjon;
   aar: number;
   aggregertData: AggregertBudsjett | null;
   fullData: BudgetYear | null;
   temaer: CMSTema[];
+  budsjettRef: React.RefObject<BudsjettSeksjonHandle | null>;
+  onBudsjettNavigasjon: (omrNr: number) => void;
 }) {
   const konf = modul.konfigurasjon;
 
@@ -82,6 +98,7 @@ function ModulKomponent({
         <PlanSection
           temaer={temaer}
           budsjettdata={fullData}
+          onBudsjettNavigasjon={onBudsjettNavigasjon}
         />
       );
 
@@ -89,6 +106,7 @@ function ModulKomponent({
       if (!aggregertData) return null;
       return (
         <BudsjettSeksjon
+          ref={budsjettRef}
           data={aggregertData}
           aar={aar}
           overskrift={konf.overskrift as string | undefined}

@@ -1,0 +1,128 @@
+{
+  "budsjettaar": 2021,
+  "utgifter_aggregert": [
+    {
+      "id": "folketrygden",
+      "navn": "Folketrygden",
+      "belop": 523454081000,
+      "omr_gruppe": [
+        28,
+        29,
+        30,
+        33
+      ],
+      "farge": "#0C1045"
+    },
+    {
+      "id": "ovrige_utgifter",
+      "navn": "Øvrige utgifter",
+      "belop": 417509443000,
+      "farge": "#181C62"
+    },
+    {
+      "id": "kommuner",
+      "navn": "Kommuner og distrikter",
+      "belop": 226853983000,
+      "omr_nr": 13,
+      "farge": "#263080"
+    },
+    {
+      "id": "helse",
+      "navn": "Helse og omsorg",
+      "belop": 205492593000,
+      "omr_nr": 10,
+      "farge": "#354A9E"
+    },
+    {
+      "id": "kunnskap",
+      "navn": "Kunnskapsformål",
+      "belop": 125512618000,
+      "omr_nr": 7,
+      "farge": "#4A65B5"
+    },
+    {
+      "id": "naering",
+      "navn": "Næring og fiskeri",
+      "belop": 94921365000,
+      "omr_nr": 17,
+      "farge": "#6580C5"
+    },
+    {
+      "id": "transport",
+      "navn": "Innenlands transport",
+      "belop": 79314378000,
+      "omr_nr": 21,
+      "farge": "#839DD5"
+    },
+    {
+      "id": "forsvar",
+      "navn": "Forsvar",
+      "belop": 64452089000,
+      "omr_nr": 4,
+      "farge": "#A8BAE2"
+    }
+  ],
+  "inntekter_aggregert": [
+    {
+      "id": "ovrige_inntekter",
+      "navn": "Øvrige inntekter",
+      "belop": 425768954000,
+      "farge": "#004D52"
+    },
+    {
+      "id": "mva",
+      "navn": "Merverdiavgift",
+      "belop": 321300000000,
+      "farge": "#006B73"
+    },
+    {
+      "id": "skatt_person",
+      "navn": "Skatt på inntekt og formue",
+      "belop": 251925000000,
+      "farge": "#008286"
+    },
+    {
+      "id": "arbeidsgiveravgift",
+      "navn": "Arbeidsgiveravgift",
+      "belop": 203000000000,
+      "farge": "#2A9D8F"
+    },
+    {
+      "id": "trygdeavgift",
+      "navn": "Trygdeavgift",
+      "belop": 155130000000,
+      "farge": "#5AB8AD"
+    },
+    {
+      "id": "petroleum",
+      "navn": "Petroleumsskatter",
+      "belop": 9900000000,
+      "farge": "#5AB8AD"
+    }
+  ],
+  "spu": {
+    "overfoering_til_fond": 98501000000,
+    "finansposter_til_fond": 0,
+    "overfoering_fra_fond": 371194304000,
+    "netto_overfoering": -272693304000,
+    "fondsuttak": 371194304000,
+    "netto_kontantstrom": 116300000000,
+    "kontantstrom_kilder": [
+      {
+        "id": "petskatt",
+        "navn": "Petroleumsskatter",
+        "belop": 9900000000
+      },
+      {
+        "id": "sdfi",
+        "navn": "SDFI",
+        "belop": 98900000000
+      },
+      {
+        "id": "equinor",
+        "navn": "Equinor-utbytte",
+        "belop": 7500000000
+      }
+    ]
+  }
+}

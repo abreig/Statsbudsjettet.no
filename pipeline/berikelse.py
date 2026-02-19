@@ -2,39 +2,40 @@
 Steg 4: Berikelse — SPU-beregninger og aggregert datasett.
 Isolerer SPU-poster, beregner netto overføring, og genererer
 det aggregerte datasettet for landingssiden.
+
+Oppdatert iht. DESIGN_OPPDATERING.md:
+- Utgifter EKSKLUDERER SPU (omr 34)
+- Inntekter EKSKLUDERER kap. 5800 (overføring fra fondet)
+- Fondsuttaket beregnes som utgifter_total - ordinære_inntekter_total
+- Monokromatiske fargeskalaer (marine for utgifter, teal for inntekter)
 """
 
 import pandas as pd
 
-# Fargetildelinger fra DESIGN.md seksjon 4.5.3 og 4.5.4
-UTGIFT_FARGER = {
-    "folketrygden": "#181C62",       # --reg-marine
-    "kommuner": "#4156A6",           # --reg-blaa
-    "helse": "#F15D61",              # --reg-korall
-    "naering": "#008286",            # --reg-teal
-    "kunnskap": "#5B91CC",           # --reg-lyseblaa
-    "forsvar": "#97499C",            # --reg-lilla
-    "transport": "#60C3AD",          # --reg-mint
-    "ovrige_utgifter": "#EDEDEE",    # --reg-lysgraa
-    "spu_ut": "#FFDF4F",            # --reg-gul
-}
+# Monokromatisk marine-skala for utgifter (DESIGN_OPPDATERING.md 2.1)
+# Sortert mørkest → lysest (tildeles etter beløpsstørrelse)
+UTGIFT_FARGESKALA = [
+    "#0C1045", "#181C62", "#263080", "#354A9E",
+    "#4A65B5", "#6580C5", "#839DD5", "#A8BAE2",
+]
 
-INNTEKT_FARGER = {
-    "skatt_person": "#4156A6",       # --reg-blaa
-    "mva": "#F15D61",                # --reg-korall
-    "petroleum": "#181C62",          # --reg-marine
-    "arbeidsgiveravgift": "#008286", # --reg-teal
-    "trygdeavgift": "#97499C",      # --reg-lilla
-    "ovrige_inntekter": "#EDEDEE",   # --reg-lysgraa
-    "spu_inn": "#FFDF4F",           # --reg-gul
-}
+# Monokromatisk teal-skala for inntekter (DESIGN_OPPDATERING.md 2.1)
+INNTEKT_FARGESKALA = [
+    "#004D52", "#006B73", "#008286", "#2A9D8F", "#5AB8AD",
+]
+
+# SPU-sone-farger
+SPU_BLA = "#2C4F8A"
 
 # Folketrygdens programområder
 FOLKETRYGD_OMRAADER = {28, 29, 30, 33}
 
 
 def beregn_spu(df: pd.DataFrame) -> dict:
-    """Isolerer SPU-poster og beregner nøkkeltall."""
+    """Isolerer SPU-poster og beregner nøkkeltall inkl. kontantstrøm-kilder."""
+    utgifter = df[df["side"] == "utgift"]
+    inntekter = df[df["side"] == "inntekt"]
+
     # Kap. 2800 post 50: Overføring til fondet
     overfoering_til = df[
         (df["kap_nr"] == 2800) & (df["post_nr"] == 50)
@@ -52,26 +53,60 @@ def beregn_spu(df: pd.DataFrame) -> dict:
 
     netto = int(overfoering_til) + int(finansposter) - int(overfoering_fra)
 
+    # Fondsuttaket = overføring fra fondet (kap 5800 post 50)
+    # Dette er det faktiske beløpet som overføres fra SPU til statsbudsjettet
+    fondsuttak = int(overfoering_fra)
+
+    # Kontantstrøm-kilder (petroleumsinntekter)
+    skatt_omr = inntekter[inntekter["omr_nr"] == 25]
+    petskatt = int(skatt_omr[skatt_omr["kap_nr"] == 5507]["GB"].sum())
+
+    # SDFI (kap 5440)
+    sdfi = int(inntekter[inntekter["kap_nr"] == 5440]["GB"].sum())
+
+    # Equinor-utbytte (kap 5685)
+    equinor = int(inntekter[inntekter["kap_nr"] == 5685]["GB"].sum())
+
+    # Netto kontantstrøm = summen av petroleumsinntekter
+    kontantstrom_kilder = [
+        {"id": "petskatt", "navn": "Petroleumsskatter", "belop": petskatt},
+        {"id": "sdfi", "navn": "SDFI", "belop": sdfi},
+    ]
+    if equinor > 0:
+        kontantstrom_kilder.append(
+            {"id": "equinor", "navn": "Equinor-utbytte", "belop": equinor}
+        )
+
+    netto_kontantstrom = sum(k["belop"] for k in kontantstrom_kilder)
+
+    # Andre petroleumsinntekter (kap 5800/2800-relaterte poster som ikke er dekket)
+    # Bruker den bokførte overføring til fond som proxy for total kontantstrøm
+    andre_petro = int(overfoering_til) + int(finansposter) - netto_kontantstrom
+    if andre_petro > 0:
+        kontantstrom_kilder.append(
+            {"id": "andre_petro", "navn": "Andre petroleumsinnt.", "belop": andre_petro}
+        )
+        netto_kontantstrom += andre_petro
+
     return {
         "overfoering_til_fond": int(overfoering_til),
         "finansposter_til_fond": int(finansposter),
         "overfoering_fra_fond": int(overfoering_fra),
         "netto_overfoering": netto,
+        "fondsuttak": fondsuttak,
+        "netto_kontantstrom": netto_kontantstrom,
+        "kontantstrom_kilder": kontantstrom_kilder,
     }
 
 
 def generer_aggregert_utgifter(df: pd.DataFrame) -> list[dict]:
-    """Genererer aggregert utgiftskategorier for stacked barplot."""
+    """Genererer aggregert utgiftskategorier for stacked barplot.
+    EKSKLUDERER SPU-overføringer (omr 34) iht. DESIGN_OPPDATERING.md."""
     utgifter = df[df["side"] == "utgift"]
 
     # Folketrygden (omr 28, 29, 30, 33)
     folketrygd_belop = int(
         utgifter[utgifter["omr_nr"].isin(FOLKETRYGD_OMRAADER)]["GB"].sum()
-    )
-
-    # SPU (omr 34 — kap < 3000)
-    spu_ut_belop = int(
-        utgifter[utgifter["omr_nr"] == 34]["GB"].sum()
     )
 
     # Kommuner og distrikter (omr 13)
@@ -104,43 +139,35 @@ def generer_aggregert_utgifter(df: pd.DataFrame) -> list[dict]:
         utgifter[utgifter["omr_nr"] == 21]["GB"].sum()
     )
 
-    # Øvrige utgifter (resten)
+    # Øvrige utgifter (resten, UTEN omr 34/SPU)
     kjente_omraader = FOLKETRYGD_OMRAADER | {34, 13, 10, 7, 17, 4, 21}
     ovrige_belop = int(
         utgifter[~utgifter["omr_nr"].isin(kjente_omraader)]["GB"].sum()
     )
 
     kategorier = [
-        {"id": "folketrygden", "navn": "Folketrygden", "belop": folketrygd_belop, "farge": UTGIFT_FARGER["folketrygden"]},
-        {"id": "spu_ut", "navn": "Overføring til SPU", "belop": spu_ut_belop, "farge": UTGIFT_FARGER["spu_ut"], "type": "spu"},
-        {"id": "kommuner", "navn": "Kommuner og distrikter", "belop": kommuner_belop, "farge": UTGIFT_FARGER["kommuner"]},
-        {"id": "helse", "navn": "Helse og omsorg", "belop": helse_belop, "farge": UTGIFT_FARGER["helse"]},
-        {"id": "kunnskap", "navn": "Kunnskapsformål", "belop": kunnskap_belop, "farge": UTGIFT_FARGER["kunnskap"]},
-        {"id": "naering", "navn": "Næring og fiskeri", "belop": naering_belop, "farge": UTGIFT_FARGER["naering"]},
-        {"id": "forsvar", "navn": "Forsvar", "belop": forsvar_belop, "farge": UTGIFT_FARGER["forsvar"]},
-        {"id": "transport", "navn": "Innenlands transport", "belop": transport_belop, "farge": UTGIFT_FARGER["transport"]},
-        {"id": "ovrige_utgifter", "navn": "Øvrige utgifter", "belop": ovrige_belop, "farge": UTGIFT_FARGER["ovrige_utgifter"]},
+        {"id": "folketrygden", "navn": "Folketrygden", "belop": folketrygd_belop, "omr_gruppe": [28, 29, 30, 33]},
+        {"id": "kommuner", "navn": "Kommuner og distrikter", "belop": kommuner_belop, "omr_nr": 13},
+        {"id": "helse", "navn": "Helse og omsorg", "belop": helse_belop, "omr_nr": 10},
+        {"id": "kunnskap", "navn": "Kunnskapsformål", "belop": kunnskap_belop, "omr_nr": 7},
+        {"id": "naering", "navn": "Næring og fiskeri", "belop": naering_belop, "omr_nr": 17},
+        {"id": "forsvar", "navn": "Forsvar", "belop": forsvar_belop, "omr_nr": 4},
+        {"id": "transport", "navn": "Innenlands transport", "belop": transport_belop, "omr_nr": 21},
+        {"id": "ovrige_utgifter", "navn": "Øvrige utgifter", "belop": ovrige_belop},
     ]
 
-    # Sorter fra størst til minst (SPU holdes separat)
-    spu_kat = [k for k in kategorier if k.get("type") == "spu"]
-    ordinaere = sorted(
-        [k for k in kategorier if k.get("type") != "spu"],
-        key=lambda x: x["belop"],
-        reverse=True,
-    )
+    # Sorter fra størst til minst, tildel farge fra monokromatisk skala
+    kategorier.sort(key=lambda x: x["belop"], reverse=True)
+    for i, kat in enumerate(kategorier):
+        kat["farge"] = UTGIFT_FARGESKALA[i] if i < len(UTGIFT_FARGESKALA) else UTGIFT_FARGESKALA[-1]
 
-    return ordinaere + spu_kat
+    return kategorier
 
 
 def generer_aggregert_inntekter(df: pd.DataFrame) -> list[dict]:
-    """Genererer aggregert inntektskategorier for stacked barplot."""
+    """Genererer aggregert inntektskategorier for stacked barplot.
+    EKSKLUDERER SPU-overføring (kap 5800) iht. DESIGN_OPPDATERING.md."""
     inntekter = df[df["side"] == "inntekt"]
-
-    # SPU-overføring (kap 5800)
-    spu_inn_belop = int(
-        inntekter[inntekter["kap_nr"] == 5800]["GB"].sum()
-    )
 
     # Skatter og avgifter (omr 25)
     skatt_omr = inntekter[inntekter["omr_nr"] == 25]
@@ -162,38 +189,35 @@ def generer_aggregert_inntekter(df: pd.DataFrame) -> list[dict]:
         ]["GB"].sum()
     )
 
-    # Petroleumsskatter (kap 5507)
+    # Petroleumsskatter (kap 5507) — EKSKLUDERES fra ordinære inntekter
+    # (håndteres i SPU-sonen som kontantstrøm)
     petroleum_belop = int(skatt_omr[skatt_omr["kap_nr"] == 5507]["GB"].sum())
 
-    # Skatt på inntekt og formue (kap 5501 — personskatt og selskapsskatt)
+    # Skatt på inntekt og formue (kap 5501)
     skatt_person_belop = int(
         skatt_omr[skatt_omr["kap_nr"] == 5501]["GB"].sum()
     )
 
-    # Øvrige inntekter: totalt minus alle kjente
-    totalt = int(inntekter["GB"].sum())
-    kjent_sum = spu_inn_belop + mva_belop + arb_avg_belop + trygd_belop + petroleum_belop + skatt_person_belop
-    ovrige_belop = totalt - kjent_sum
+    # Øvrige inntekter: totalt MINUS kap. 5800 MINUS alle kjente
+    totalt_uten_spu = int(inntekter[inntekter["kap_nr"] != 5800]["GB"].sum())
+    kjent_sum = mva_belop + arb_avg_belop + trygd_belop + petroleum_belop + skatt_person_belop
+    ovrige_belop = totalt_uten_spu - kjent_sum
 
     kategorier = [
-        {"id": "skatt_person", "navn": "Skatt på inntekt og formue", "belop": skatt_person_belop, "farge": INNTEKT_FARGER["skatt_person"]},
-        {"id": "mva", "navn": "Merverdiavgift", "belop": mva_belop, "farge": INNTEKT_FARGER["mva"]},
-        {"id": "petroleum", "navn": "Petroleumsskatter", "belop": petroleum_belop, "farge": INNTEKT_FARGER["petroleum"]},
-        {"id": "arbeidsgiveravgift", "navn": "Arbeidsgiveravgift", "belop": arb_avg_belop, "farge": INNTEKT_FARGER["arbeidsgiveravgift"]},
-        {"id": "trygdeavgift", "navn": "Trygdeavgift", "belop": trygd_belop, "farge": INNTEKT_FARGER["trygdeavgift"]},
-        {"id": "ovrige_inntekter", "navn": "Øvrige inntekter", "belop": ovrige_belop, "farge": INNTEKT_FARGER["ovrige_inntekter"]},
-        {"id": "spu_inn", "navn": "Overføring fra SPU", "belop": spu_inn_belop, "farge": INNTEKT_FARGER["spu_inn"], "type": "spu"},
+        {"id": "skatt_person", "navn": "Skatt på inntekt og formue", "belop": skatt_person_belop},
+        {"id": "mva", "navn": "Merverdiavgift", "belop": mva_belop},
+        {"id": "petroleum", "navn": "Petroleumsskatter", "belop": petroleum_belop},
+        {"id": "arbeidsgiveravgift", "navn": "Arbeidsgiveravgift", "belop": arb_avg_belop},
+        {"id": "trygdeavgift", "navn": "Trygdeavgift", "belop": trygd_belop},
+        {"id": "ovrige_inntekter", "navn": "Øvrige inntekter", "belop": ovrige_belop},
     ]
 
-    # Sorter fra størst til minst (SPU holdes separat)
-    spu_kat = [k for k in kategorier if k.get("type") == "spu"]
-    ordinaere = sorted(
-        [k for k in kategorier if k.get("type") != "spu"],
-        key=lambda x: x["belop"],
-        reverse=True,
-    )
+    # Sorter fra størst til minst, tildel farge fra monokromatisk teal-skala
+    kategorier.sort(key=lambda x: x["belop"], reverse=True)
+    for i, kat in enumerate(kategorier):
+        kat["farge"] = INNTEKT_FARGESKALA[i] if i < len(INNTEKT_FARGESKALA) else INNTEKT_FARGESKALA[-1]
 
-    return ordinaere + spu_kat
+    return kategorier
 
 
 if __name__ == "__main__":
@@ -209,11 +233,16 @@ if __name__ == "__main__":
     print(f"  Finansposter til fond: {spu['finansposter_til_fond'] / 1e9:.1f} mrd. kr")
     print(f"  Overføring fra fond: {spu['overfoering_fra_fond'] / 1e9:.1f} mrd. kr")
     print(f"  Netto overføring: {spu['netto_overfoering'] / 1e9:.1f} mrd. kr")
+    print(f"  Fondsuttak: {spu['fondsuttak'] / 1e9:.1f} mrd. kr")
+    print(f"  Netto kontantstrøm: {spu['netto_kontantstrom'] / 1e9:.1f} mrd. kr")
+    print("  Kontantstrøm-kilder:")
+    for k in spu["kontantstrom_kilder"]:
+        print(f"    {k['navn']}: {k['belop'] / 1e9:.1f} mrd. kr")
 
-    print("\nAggregert utgifter:")
+    print("\nAggregert utgifter (uten SPU):")
     for kat in generer_aggregert_utgifter(df):
-        print(f"  {kat['navn']}: {kat['belop'] / 1e9:.1f} mrd. kr")
+        print(f"  {kat['navn']}: {kat['belop'] / 1e9:.1f} mrd. kr [{kat['farge']}]")
 
-    print("\nAggregert inntekter:")
+    print("\nAggregert inntekter (uten SPU):")
     for kat in generer_aggregert_inntekter(df):
-        print(f"  {kat['navn']}: {kat['belop'] / 1e9:.1f} mrd. kr")
+        print(f"  {kat['navn']}: {kat['belop'] / 1e9:.1f} mrd. kr [{kat['farge']}]")

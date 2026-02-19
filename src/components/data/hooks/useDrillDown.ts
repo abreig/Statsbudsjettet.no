@@ -27,7 +27,7 @@ export function useDrillDown(
     setLaster(true);
     setFeil(null);
 
-    fetch(`/data/${aar}/gul_bok_full.json`)
+    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/data/${aar}/gul_bok_full.json`)
       .then((res) => {
         if (!res.ok) throw new Error(`Kunne ikke laste data for ${aar}`);
         return res.json();

@@ -1,0 +1,44 @@
+{
+  "budsjettaar": 2022,
+  "publisert": "2026-02-19",
+  "kilde": "Gul bok 2022",
+  "saldert_budsjett_forrige": "2021",
+  "totaler": {
+    "utgifter": 2062493768000,
+    "inntekter": 1968611653000
+  },
+  "spu": {
+    "overfoering_til_fond": 277101000000,
+    "finansposter_til_fond": 70000000000,
+    "overfoering_fra_fond": 300255117000,
+    "netto_overfoering": 46845883000,
+    "fondsuttak": 300255117000,
+    "netto_kontantstrom": 347101000000,
+    "kontantstrom_kilder": [
+      {
+        "id": "petskatt",
+        "navn": "Petroleumsskatter",
+        "belop": 161600000000
+      },
+      {
+        "id": "sdfi",
+        "navn": "SDFI",
+        "belop": 122700000000
+      },
+      {
+        "id": "equinor",
+        "navn": "Equinor-utbytte",
+        "belop": 13000000000
+      },
+      {
+        "id": "andre_petro",
+        "navn": "Andre petroleumsinnt.",
+        "belop": 49801000000
+      }
+    ]
+  },
+  "antall_poster": {
+    "utgifter": null,
+    "inntekter": null
+  }
+}

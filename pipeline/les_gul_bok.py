@@ -66,25 +66,15 @@ def valider_grunndata(df: pd.DataFrame) -> dict:
         "total_inntekter_kr": int(df[df["side"] == "inntekt"]["GB"].sum()),
     }
 
-    # Forventede verdier for 2025
-    forventet_rader = 1761
-    forventet_utgiftsposter = 1346
-    forventet_inntektsposter = 415
+    # Grunnleggende sjekker (gjelder alle år)
+    if resultater["antall_rader"] < 100:
+        print(f"ADVARSEL: Uvanlig få rader: {resultater['antall_rader']}")
 
-    if resultater["antall_rader"] != forventet_rader:
-        print(f"ADVARSEL: Forventet {forventet_rader} rader, fikk {resultater['antall_rader']}")
+    if resultater["antall_utgiftsposter"] == 0:
+        print("ADVARSEL: Ingen utgiftsposter funnet!")
 
-    if resultater["antall_utgiftsposter"] != forventet_utgiftsposter:
-        print(
-            f"ADVARSEL: Forventet {forventet_utgiftsposter} utgiftsposter, "
-            f"fikk {resultater['antall_utgiftsposter']}"
-        )
-
-    if resultater["antall_inntektsposter"] != forventet_inntektsposter:
-        print(
-            f"ADVARSEL: Forventet {forventet_inntektsposter} inntektsposter, "
-            f"fikk {resultater['antall_inntektsposter']}"
-        )
+    if resultater["antall_inntektsposter"] == 0:
+        print("ADVARSEL: Ingen inntektsposter funnet!")
 
     return resultater
 

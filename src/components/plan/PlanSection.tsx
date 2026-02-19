@@ -5,6 +5,7 @@ import type { CMSTema } from "@/lib/mock-cms";
 import { formaterBelop } from "@/components/shared/NumberFormat";
 import type { BudgetYear } from "@/components/data/types/budget";
 import { opplosDatareferanse } from "@/lib/datareferanse";
+import ModalOverlay from "@/components/shared/ModalOverlay";
 import styles from "./PlanSection.module.css";
 
 interface PlanSectionProps {
@@ -20,49 +21,76 @@ export default function PlanSection({
 }: PlanSectionProps) {
   const [aktivtTema, setAktivtTema] = useState<number | null>(null);
 
+  const aktivtTemaData = temaer.find((t) => t.nr === aktivtTema) ?? null;
+
+  const handleBudsjettKlikk = (omrNr: number) => {
+    // Lukk modal først, så naviger til budsjett-drill-down
+    setAktivtTema(null);
+    // Gi tid til at modal lukkes før vi scroller/åpner drill-down
+    requestAnimationFrame(() => {
+      const budsjettSeksjon = document.getElementById("budsjett");
+      if (budsjettSeksjon) {
+        budsjettSeksjon.scrollIntoView({ behavior: "smooth" });
+      }
+      // Vent litt på scroll, deretter åpne drill-down
+      setTimeout(() => {
+        onBudsjettNavigasjon?.(omrNr);
+      }, 400);
+    });
+  };
+
   return (
     <section className={styles.section} id="plan">
       <h2 className={styles.sectionTitle}>Regjeringens plan for Norge</h2>
 
       <div className={styles.temaGrid}>
         {temaer.map((tema) => (
-          <div key={tema.nr}>
-            <article
-              className={styles.temaKort}
-              onClick={() =>
-                setAktivtTema(aktivtTema === tema.nr ? null : tema.nr)
+          <article
+            key={tema.nr}
+            className={styles.temaKort}
+            onClick={() => setAktivtTema(tema.nr)}
+            role="button"
+            tabIndex={0}
+            aria-label={`${tema.tittel}. Klikk for å lese mer.`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setAktivtTema(tema.nr);
               }
-              aria-expanded={aktivtTema === tema.nr}
+            }}
+          >
+            <div
+              className={styles.temaFargeLinje}
+              style={{ backgroundColor: tema.farge }}
+            />
+            <h3 className={styles.temaTittel}>{tema.tittel}</h3>
+            <p className={styles.temaIngress}>{tema.ingress}</p>
+            <span
+              className={styles.lesMer}
+              style={{ color: tema.farge }}
+              aria-hidden="true"
             >
-              <div
-                className={styles.temaFargeLinje}
-                style={{ backgroundColor: tema.farge }}
-              />
-              <h3 className={styles.temaTittel}>{tema.tittel}</h3>
-              <p className={styles.temaIngress}>{tema.ingress}</p>
-              <button
-                className={styles.lesMer}
-                style={{ color: tema.farge }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setAktivtTema(aktivtTema === tema.nr ? null : tema.nr);
-                }}
-              >
-                {aktivtTema === tema.nr ? "Lukk" : "Les mer →"}
-              </button>
-            </article>
-
-            {aktivtTema === tema.nr && (
-              <TemaDetalj
-                tema={tema}
-                budsjettdata={budsjettdata}
-                onClose={() => setAktivtTema(null)}
-                onBudsjettNavigasjon={onBudsjettNavigasjon}
-              />
-            )}
-          </div>
+              Les mer &rarr;
+            </span>
+          </article>
         ))}
       </div>
+
+      {/* TemaDetalj i ModalOverlay */}
+      <ModalOverlay
+        open={aktivtTemaData !== null}
+        onClose={() => setAktivtTema(null)}
+        ariaLabel={aktivtTemaData?.tittel ?? "Temavisning"}
+      >
+        {aktivtTemaData && (
+          <TemaDetalj
+            tema={aktivtTemaData}
+            budsjettdata={budsjettdata}
+            onClose={() => setAktivtTema(null)}
+            onBudsjettNavigasjon={handleBudsjettKlikk}
+          />
+        )}
+      </ModalOverlay>
     </section>
   );
 }
@@ -81,9 +109,15 @@ function TemaDetalj({
   return (
     <div className={styles.detalj}>
       <div className={styles.detaljHeader}>
-        <h3 className={styles.detaljTittel} style={{ color: tema.farge }}>
-          {tema.tittel}
-        </h3>
+        <div>
+          <div
+            className={styles.temaFargeLinje}
+            style={{ backgroundColor: tema.farge, width: 48, marginBottom: "var(--space-2)" }}
+          />
+          <h3 className={styles.detaljTittel} style={{ color: tema.farge }}>
+            {tema.tittel}
+          </h3>
+        </div>
         <button className={styles.detaljLukk} onClick={onClose} aria-label="Lukk">
           ✕
         </button>

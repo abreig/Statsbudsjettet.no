@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { TILGJENGELIGE_AAR } from "@/lib/mock-cms";
 import styles from "./Header.module.css";
 
 interface HeaderProps {
@@ -10,6 +12,12 @@ interface HeaderProps {
 
 export default function Header({ aar = 2025 }: HeaderProps) {
   const [menyAapen, setMenyAapen] = useState(false);
+  const router = useRouter();
+
+  const handleAarEndring = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nyttAar = e.target.value;
+    router.push(`/${nyttAar}`);
+  };
 
   return (
     <header className={styles.header}>
@@ -47,9 +55,13 @@ export default function Header({ aar = 2025 }: HeaderProps) {
           className={styles.aarVelger}
           value={aar}
           aria-label="Velg budsjettår"
-          onChange={() => {}}
+          onChange={handleAarEndring}
         >
-          <option value={2025}>2025</option>
+          {TILGJENGELIGE_AAR.map((a) => (
+            <option key={a} value={a}>
+              {a}
+            </option>
+          ))}
         </select>
 
         <button
