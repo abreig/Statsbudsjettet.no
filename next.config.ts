@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   // Statisk eksport for CDN-distribusjon
   output: "standalone",
 
+  // Unngå turbopack-forvirring med sanity/-undermappen
+  turbopack: {
+    root: __dirname,
+  },
+
   // Sikre headere
   headers: async () => [
     {
