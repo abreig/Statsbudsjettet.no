@@ -1,0 +1,150 @@
+/* ==========================================================================
+   Designtokens for statsbudsjettet.no
+   Farger, typografi, breakpoints, spacing og animasjon.
+   ========================================================================== */
+
+:root {
+  /* -------------------------------------------------------------------
+     Regjeringspaletten — hovedfarger (budsjettgrafer)
+     ------------------------------------------------------------------- */
+  --reg-marine: #181c62;
+  --reg-blaa: #4156a6;
+  --reg-lyseblaa: #5b91cc;
+  --reg-korall: #f15d61;
+  --reg-lysgraa: #ededee;
+
+  /* -------------------------------------------------------------------
+     Regjeringspaletten — tilleggsfarger (diagrammer)
+     ------------------------------------------------------------------- */
+  --reg-lilla: #97499c;
+  --reg-teal: #008286;
+  --reg-mint: #60c3ad;
+  --reg-gul: #ffdf4f; /* KUN for SPU-overføringer */
+
+  /* -------------------------------------------------------------------
+     Plan for Norge — temaaksentfarger
+     ------------------------------------------------------------------- */
+  --tema-1: #2a7f7f; /* Trygghet for økonomien */
+  --tema-2: #7b5ea7; /* Trygghet for arbeids- og næringslivet */
+  --tema-3: #c99a2e; /* Trygghet for barn og unge */
+  --tema-4: #b84c3c; /* Trygghet for helsa */
+  --tema-5: #8b7530; /* Trygghet for landet */
+
+  /* -------------------------------------------------------------------
+     Bakgrunn og overflate
+     ------------------------------------------------------------------- */
+  --bg-sand: #f7f4ef;
+  --bg-hvit: #ffffff;
+  --bg-moerk: #181c62;
+
+  /* -------------------------------------------------------------------
+     Tekstfarger
+     ------------------------------------------------------------------- */
+  --tekst-primaer: #1a1a1a;
+  --tekst-sekundaer: #555555;
+  --tekst-invers: #ffffff;
+  --tekst-deaktivert: #999999;
+
+  /* -------------------------------------------------------------------
+     Semantiske farger
+     ------------------------------------------------------------------- */
+  --farge-okning: #2a7f2a;
+  --farge-nedgang: #c0392b;
+
+  /* -------------------------------------------------------------------
+     Typografi
+     Serif for redaksjonelt, sans-serif for tall/grafer/navigasjon.
+     Tabular lining figures i grafer og tabeller.
+     ------------------------------------------------------------------- */
+  --font-serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman",
+    serif;
+  --font-sans: "DM Sans", "Plus Jakarta Sans", system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-tall: var(--font-sans);
+
+  /* Fontstørrelser */
+  --tekst-xs: 0.75rem; /* 12px */
+  --tekst-sm: 0.875rem; /* 14px */
+  --tekst-base: 1rem; /* 16px */
+  --tekst-lg: 1.125rem; /* 18px */
+  --tekst-xl: 1.25rem; /* 20px */
+  --tekst-2xl: 1.5rem; /* 24px */
+  --tekst-3xl: 1.875rem; /* 30px */
+  --tekst-4xl: 2.25rem; /* 36px */
+  --tekst-5xl: 3rem; /* 48px */
+
+  /* Linjehøyder */
+  --linjehoyde-tett: 1.25;
+  --linjehoyde-normal: 1.6;
+  --linjehoyde-romslig: 1.8;
+
+  /* Fontvekter */
+  --vekt-normal: 400;
+  --vekt-medium: 500;
+  --vekt-semibold: 600;
+  --vekt-bold: 700;
+
+  /* -------------------------------------------------------------------
+     Spacing-skala (8px base)
+     ------------------------------------------------------------------- */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.5rem; /* 24px */
+  --space-6: 2rem; /* 32px */
+  --space-8: 3rem; /* 48px */
+  --space-10: 4rem; /* 64px */
+  --space-12: 5rem; /* 80px */
+  --space-16: 8rem; /* 128px */
+
+  /* -------------------------------------------------------------------
+     Breakpoints (referanseverdier, brukes i media queries)
+     Mobil: < 640px | Nettbrett: 640–1024px | Desktop: > 1024px
+     ------------------------------------------------------------------- */
+  --bp-mobil: 640px;
+  --bp-nettbrett: 1024px;
+  --bp-desktop-bred: 1280px;
+
+  /* -------------------------------------------------------------------
+     Maks bredde for innhold
+     ------------------------------------------------------------------- */
+  --innhold-smal: 40rem; /* 640px — tekst-bredde */
+  --innhold-bred: 72rem; /* 1152px — bred innhold */
+  --innhold-maks: 80rem; /* 1280px — maks sidebredde */
+
+  /* -------------------------------------------------------------------
+     Skygger
+     ------------------------------------------------------------------- */
+  --skygge-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --skygge-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --skygge-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  /* -------------------------------------------------------------------
+     Avrunding
+     ------------------------------------------------------------------- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* -------------------------------------------------------------------
+     Animasjon — respekteres av prefers-reduced-motion i globals.css
+     ------------------------------------------------------------------- */
+  --varighet-rask: 150ms;
+  --varighet-normal: 300ms;
+  --varighet-treg: 500ms;
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-inn: cubic-bezier(0.4, 0, 1, 1);
+  --easing-ut: cubic-bezier(0, 0, 0.2, 1);
+
+  /* -------------------------------------------------------------------
+     Z-index-skala
+     ------------------------------------------------------------------- */
+  --z-base: 0;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+  --z-tooltip: 50;
+}

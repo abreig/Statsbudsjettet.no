@@ -1,0 +1,20 @@
+{
+  "budsjettaar": 2025,
+  "publisert": "2026-02-19",
+  "kilde": "Gul bok 2025",
+  "saldert_budsjett_forrige": "2024",
+  "totaler": {
+    "utgifter": 2970883012000,
+    "inntekter": 2796781829000
+  },
+  "spu": {
+    "overfoering_til_fond": 642769100000,
+    "finansposter_til_fond": 82100000000,
+    "overfoering_fra_fond": 413647646000,
+    "netto_overfoering": 311221454000
+  },
+  "antall_poster": {
+    "utgifter": null,
+    "inntekter": null
+  }
+}
