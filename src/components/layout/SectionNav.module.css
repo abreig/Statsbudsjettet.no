@@ -1,0 +1,44 @@
+.sectionNav {
+  position: sticky;
+  top: 52px;
+  z-index: calc(var(--z-sticky) - 1);
+  background-color: var(--bg-sand);
+  border-bottom: 1px solid var(--reg-lysgraa);
+  padding: var(--space-2) var(--space-4);
+}
+
+.sectionNavInner {
+  max-width: var(--innhold-maks);
+  margin: 0 auto;
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+}
+
+.ankerpunkt {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  color: var(--tekst-sekundaer);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: var(--space-1) 0;
+  border-bottom: 2px solid transparent;
+  transition: color var(--varighet-rask) var(--easing-standard),
+    border-color var(--varighet-rask) var(--easing-standard);
+}
+
+.ankerpunkt:hover {
+  color: var(--reg-marine);
+}
+
+.ankerpunktAktiv {
+  composes: ankerpunkt;
+  color: var(--reg-marine);
+  border-bottom-color: var(--reg-marine);
+}
+
+@media (max-width: 640px) {
+  .sectionNav {
+    display: none;
+  }
+}
