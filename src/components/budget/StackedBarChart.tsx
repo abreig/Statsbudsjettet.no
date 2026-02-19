@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import type { AggregertKategori, SPUData } from "@/components/data/types/budget";
 import { formaterBelop } from "@/components/shared/NumberFormat";
 import styles from "./StackedBarChart.module.css";
@@ -44,7 +44,6 @@ function beregnSegmenter(
 }
 
 function tekstFargeForBakgrunn(farge: string): string {
-  // Lyse farger som trenger mørk tekst
   const lyseFarger = ["#EDEDEE", "#FFDF4F", "#60C3AD", "#ededee", "#ffdf4f", "#60c3ad"];
   return lyseFarger.some((lf) => farge.toLowerCase() === lf.toLowerCase())
     ? "#181C62"
@@ -58,6 +57,7 @@ function BarPlot({
   onSegmentClick,
   hoverSegment,
   onHover,
+  erAnimert,
 }: {
   kategorier: AggregertKategori[];
   tittel: string;
@@ -65,6 +65,7 @@ function BarPlot({
   onSegmentClick: (side: "utgift" | "inntekt", id: string) => void;
   hoverSegment: string | null;
   onHover: (id: string | null) => void;
+  erAnimert: boolean;
 }) {
   const total = useMemo(
     () => kategorier.reduce((sum, k) => sum + k.belop, 0),
@@ -75,6 +76,11 @@ function BarPlot({
     () => beregnSegmenter(kategorier, total),
     [kategorier, total]
   );
+
+  // Skjermleser-oppsummering av tallene
+  const oppsummering = segmenter
+    .map((seg) => `${seg.kategori.navn}: ${formaterBelop(seg.kategori.belop)}`)
+    .join(". ");
 
   return (
     <div className={styles.barColumn}>
@@ -90,7 +96,7 @@ function BarPlot({
       >
         <desc>
           Stacked barplot som viser {tittel.toLowerCase()} fordelt på {kategorier.length} kategorier.
-          Totalt {formaterBelop(total)}.
+          Totalt {formaterBelop(total)}. {oppsummering}
         </desc>
 
         {/* SPU stripemønster */}
@@ -107,19 +113,22 @@ function BarPlot({
           </pattern>
         </defs>
 
-        {segmenter.map((seg) => {
+        {segmenter.map((seg, indeks) => {
           const erHovert = hoverSegment === seg.kategori.id;
           const erDimmet =
             hoverSegment !== null && hoverSegment !== seg.kategori.id;
           const erSPU = seg.kategori.type === "spu";
           const minHoyde = Math.max(seg.hoyde, 2);
 
+          // Staggered reveal: segmenter bygges opp fra bunnen
+          const forsinkelse = indeks * 60; // 60ms mellom hvert segment
+
           return (
             <g
               key={seg.kategori.id}
               tabIndex={0}
               role="button"
-              aria-label={`${seg.kategori.navn}: ${formaterBelop(seg.kategori.belop)}`}
+              aria-label={`${seg.kategori.navn}: ${formaterBelop(seg.kategori.belop)}, ${((seg.kategori.belop / total) * 100).toFixed(1)} prosent`}
               onClick={() => onSegmentClick(side, seg.kategori.id)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -133,8 +142,9 @@ function BarPlot({
               onBlur={() => onHover(null)}
               style={{
                 cursor: "pointer",
-                opacity: erDimmet ? 0.4 : 1,
-                transition: "opacity 150ms ease",
+                opacity: erDimmet ? 0.4 : erAnimert ? 1 : 0,
+                transition: `opacity 150ms ease, transform 400ms ease ${forsinkelse}ms`,
+                transform: erAnimert ? "translateY(0)" : `translateY(${BAR_HOYDE - seg.y}px)`,
               }}
             >
               {/* Segment-rektangel */}
@@ -160,7 +170,6 @@ function BarPlot({
 
               {/* Etikett */}
               {seg.hoyde > 25 ? (
-                // Intern etikett for store segmenter
                 <text
                   x={BAR_BREDDE / 2}
                   y={seg.y + seg.hoyde / 2}
@@ -225,9 +234,31 @@ export default function StackedBarChart({
   onSegmentClick,
 }: StackedBarChartProps) {
   const [hoverSegment, setHoverSegment] = useState<string | null>(null);
+  const [erAnimert, setErAnimert] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Staggered reveal: animerer seg inn etter mount
+  useEffect(() => {
+    // Bruk IntersectionObserver for å trigge animasjonen når grafen er synlig
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setErAnimert(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (wrapperRef.current) {
+      observer.observe(wrapperRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} ref={wrapperRef}>
       <BarPlot
         kategorier={utgifter}
         tittel="Utgifter"
@@ -235,6 +266,7 @@ export default function StackedBarChart({
         onSegmentClick={onSegmentClick}
         hoverSegment={hoverSegment}
         onHover={setHoverSegment}
+        erAnimert={erAnimert}
       />
       <BarPlot
         kategorier={inntekter}
@@ -243,6 +275,7 @@ export default function StackedBarChart({
         onSegmentClick={onSegmentClick}
         hoverSegment={hoverSegment}
         onHover={setHoverSegment}
+        erAnimert={erAnimert}
       />
     </div>
   );

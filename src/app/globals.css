@@ -42,6 +42,38 @@ abbr[title] {
   outline-offset: 2px;
 }
 
+/* Hopp-til-innhold-lenke (skip link) */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-4);
+  z-index: 10000;
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--reg-marine);
+  color: var(--bg-hvit);
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: var(--space-2);
+}
+
+/* Skjermleser-kun (visuelt skjult) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

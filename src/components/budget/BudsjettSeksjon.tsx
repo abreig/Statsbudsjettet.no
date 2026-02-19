@@ -1,9 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import StackedBarChart from "./StackedBarChart";
-import DrillDownPanel from "./DrillDownPanel";
 import type { AggregertBudsjett, HierarkiNode } from "@/components/data/types/budget";
+
+// Lazy-load DrillDownPanel (kun lastes når bruker klikker et segment)
+const DrillDownPanel = dynamic(() => import("./DrillDownPanel"), {
+  ssr: false,
+});
 import { useDrillDown } from "@/components/data/hooks/useDrillDown";
 
 interface BudsjettSeksjonProps {

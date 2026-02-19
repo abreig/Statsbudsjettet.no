@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
+import type { Metadata } from "next";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PageContainer from "@/components/layout/PageContainer";
@@ -9,6 +10,27 @@ import type { AggregertBudsjett, BudgetYear } from "@/components/data/types/budg
 
 interface BudsjettaarSideProps {
   params: Promise<{ aar: string }>;
+}
+
+/** Statisk generering av kjente budsjettår */
+export async function generateStaticParams() {
+  const dataDir = path.join(process.cwd(), "data");
+  try {
+    const aarMapper = await fs.readdir(dataDir);
+    return aarMapper
+      .filter((m) => /^\d{4}$/.test(m))
+      .map((aar) => ({ aar }));
+  } catch {
+    return [{ aar: "2025" }];
+  }
+}
+
+export async function generateMetadata({ params }: BudsjettaarSideProps): Promise<Metadata> {
+  const { aar } = await params;
+  return {
+    title: `Statsbudsjettet ${aar}`,
+    description: `Regjeringens forslag til statsbudsjett for ${aar}. Se utgifter, inntekter og regjeringens prioriteringer.`,
+  };
 }
 
 async function hentAggregertData(aar: string): Promise<AggregertBudsjett | null> {
@@ -45,7 +67,7 @@ export default async function BudsjettaarSide({ params }: BudsjettaarSideProps) 
   return (
     <>
       <Header aar={aarNum} />
-      <main>
+      <main id="main-content">
         <PageContainer>
           {cmsData ? (
             <ModulRendrer

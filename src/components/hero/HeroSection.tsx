@@ -1,4 +1,7 @@
+"use client";
+
 import { formaterBelop } from "@/components/shared/NumberFormat";
+import CountUp from "@/components/shared/CountUp";
 import type { BudgetYear } from "@/components/data/types/budget";
 import { opplosDatareferanse } from "@/lib/datareferanse";
 import styles from "./HeroSection.module.css";
@@ -30,21 +33,25 @@ export default function HeroSection({
       <h1 className={styles.tittel}>{tittel}</h1>
       {undertittel && <p className={styles.undertittel}>{undertittel}</p>}
 
-      <div className={styles.nokkeltall}>
+      <div className={styles.nokkeltall} role="list" aria-label="Nøkkeltall fra statsbudsjettet">
         {nokkeltall.map((tall) => {
-          let visningsverdi = tall.verdi;
+          let numeriskVerdi: number | null = null;
 
-          if (!visningsverdi && tall.datareferanse && budsjettdata) {
-            const verdi = opplosDatareferanse(tall.datareferanse, budsjettdata);
-            if (verdi !== null) {
-              visningsverdi = formaterBelop(verdi);
-            }
+          if (tall.datareferanse && budsjettdata) {
+            numeriskVerdi = opplosDatareferanse(tall.datareferanse, budsjettdata);
           }
 
           return (
-            <div key={tall.etikett} className={styles.nokkeltallItem}>
+            <div key={tall.etikett} className={styles.nokkeltallItem} role="listitem">
               <div className={styles.nokkeltallVerdi}>
-                {visningsverdi ?? "—"}
+                {numeriskVerdi !== null ? (
+                  <CountUp
+                    sluttverdi={numeriskVerdi}
+                    formaterer={formaterBelop}
+                  />
+                ) : (
+                  tall.verdi ?? "—"
+                )}
               </div>
               <div className={styles.nokkeltallEtikett}>{tall.etikett}</div>
             </div>

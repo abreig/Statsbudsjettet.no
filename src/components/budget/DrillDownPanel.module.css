@@ -152,8 +152,36 @@
   flex-shrink: 0;
 }
 
+/* Tabellvisning med responsiv kortvisning */
+.postTabell {
+  overflow-x: auto;
+}
+
 @media (max-width: 640px) {
   .panel {
     width: 100%;
+  }
+
+  /* Tabell kollapser til kortvisning på mobil */
+  .postTabell table thead {
+    display: none;
+  }
+
+  .postTabell table tbody tr {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-3);
+    border: 1px solid var(--reg-lysgraa);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-2);
+  }
+
+  .postTabell table tbody td {
+    padding: var(--space-1) 0 !important;
+    text-align: left !important;
+  }
+
+  .postTabell table tbody td:last-child {
+    font-weight: var(--vekt-semibold);
   }
 }
