@@ -1,0 +1,80 @@
+.seksjon {
+  padding: var(--space-8) 0;
+}
+
+.tittel {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-3xl);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+/* Horisontal layout (standard) */
+.layoutHorisontal {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+/* Vertikal layout */
+.layoutVertikal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: var(--innhold-smal);
+  margin: 0 auto;
+}
+
+/* Rutenett layout */
+.layoutRutenett {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+  max-width: var(--innhold-bred);
+  margin: 0 auto;
+}
+
+.kort {
+  text-align: center;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--reg-lysgraa);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-hvit);
+}
+
+.verdi {
+  font-family: var(--font-tall);
+  font-size: var(--tekst-2xl);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+  line-height: var(--linjehoyde-tett);
+  margin-bottom: var(--space-1);
+}
+
+.etikett {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  color: var(--tekst-sekundaer);
+}
+
+.enhet {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-xs);
+  color: var(--tekst-sekundaer);
+  margin-top: var(--space-1);
+}
+
+@media (max-width: 640px) {
+  .layoutHorisontal {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .verdi {
+    font-size: var(--tekst-xl);
+  }
+}

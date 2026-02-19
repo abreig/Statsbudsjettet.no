@@ -1,0 +1,192 @@
+.section {
+  padding: var(--space-8) 0;
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-3xl);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.temaGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-4);
+}
+
+.temaKort {
+  border: 1px solid var(--reg-lysgraa);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background-color: var(--bg-hvit);
+  cursor: pointer;
+  transition: box-shadow var(--varighet-rask) var(--easing-standard),
+    transform var(--varighet-rask) var(--easing-standard);
+}
+
+.temaKort:hover {
+  box-shadow: var(--skygge-md);
+  transform: translateY(-2px);
+}
+
+.temaFargeLinje {
+  height: 4px;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-3);
+}
+
+.temaTittel {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-base);
+  font-weight: var(--vekt-semibold);
+  color: var(--tekst-primaer);
+  margin-bottom: var(--space-2);
+}
+
+.temaIngress {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  color: var(--tekst-sekundaer);
+  line-height: var(--linjehoyde-normal);
+  margin-bottom: var(--space-3);
+}
+
+.lesMer {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  font-weight: var(--vekt-medium);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Utvidet temavisning */
+.detalj {
+  grid-column: 1 / -1;
+  border: 1px solid var(--reg-lysgraa);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  background-color: var(--bg-hvit);
+  animation: expandIn var(--varighet-normal) var(--easing-ut);
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
+
+.detaljHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+}
+
+.detaljTittel {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-2xl);
+  font-weight: var(--vekt-bold);
+  color: var(--tekst-primaer);
+}
+
+.detaljLukk {
+  background: none;
+  border: 1px solid var(--reg-lysgraa);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  font-size: var(--tekst-sm);
+}
+
+.detaljInnhold {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-base);
+  color: var(--tekst-primaer);
+  line-height: var(--linjehoyde-normal);
+  margin-bottom: var(--space-4);
+}
+
+.prioriteringListe {
+  list-style: none;
+  margin-bottom: var(--space-4);
+}
+
+.prioritering {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--reg-lysgraa);
+}
+
+.prioriteringTittel {
+  font-weight: var(--vekt-semibold);
+  margin-bottom: var(--space-1);
+}
+
+.sitatBlokk {
+  border-left: 4px solid;
+  padding: var(--space-4) var(--space-5);
+  margin: var(--space-4) 0;
+  background-color: var(--bg-sand);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.sitatTekst {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--tekst-lg);
+  color: var(--tekst-primaer);
+  margin-bottom: var(--space-2);
+}
+
+.sitatPerson {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  color: var(--tekst-sekundaer);
+}
+
+.budsjettLenker {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.budsjettLenke {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--reg-lysgraa);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  color: var(--reg-blaa);
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  transition: background-color var(--varighet-rask) var(--easing-standard);
+}
+
+.budsjettLenke:hover {
+  background-color: var(--bg-sand);
+}
+
+@media (max-width: 1024px) {
+  .temaGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .temaGrid {
+    grid-template-columns: 1fr;
+  }
+}

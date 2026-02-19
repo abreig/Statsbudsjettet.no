@@ -1,0 +1,111 @@
+{
+  "budsjettaar": 2025,
+  "utgifter_aggregert": [
+    {
+      "id": "folketrygden",
+      "navn": "Folketrygden",
+      "belop": 701915317000,
+      "farge": "#181C62"
+    },
+    {
+      "id": "ovrige_utgifter",
+      "navn": "Øvrige utgifter",
+      "belop": 522197982000,
+      "farge": "#EDEDEE"
+    },
+    {
+      "id": "kommuner",
+      "navn": "Kommuner og distrikter",
+      "belop": 290493267000,
+      "farge": "#4156A6"
+    },
+    {
+      "id": "helse",
+      "navn": "Helse og omsorg",
+      "belop": 248109015000,
+      "farge": "#F15D61"
+    },
+    {
+      "id": "kunnskap",
+      "navn": "Kunnskapsformål",
+      "belop": 144718634000,
+      "farge": "#5B91CC"
+    },
+    {
+      "id": "naering",
+      "navn": "Næring og fiskeri",
+      "belop": 134331771000,
+      "farge": "#008286"
+    },
+    {
+      "id": "forsvar",
+      "navn": "Forsvar",
+      "belop": 110069526000,
+      "farge": "#97499C"
+    },
+    {
+      "id": "transport",
+      "navn": "Innenlands transport",
+      "belop": 94178400000,
+      "farge": "#60C3AD"
+    },
+    {
+      "id": "spu_ut",
+      "navn": "Overføring til SPU",
+      "belop": 724869100000,
+      "farge": "#FFDF4F",
+      "type": "spu"
+    }
+  ],
+  "inntekter_aggregert": [
+    {
+      "id": "ovrige_inntekter",
+      "navn": "Øvrige inntekter",
+      "belop": 696578383000,
+      "farge": "#EDEDEE"
+    },
+    {
+      "id": "skatt_person",
+      "navn": "Skatt på inntekt og formue",
+      "belop": 430063300000,
+      "farge": "#4156A6"
+    },
+    {
+      "id": "mva",
+      "navn": "Merverdiavgift",
+      "belop": 409258000000,
+      "farge": "#F15D61"
+    },
+    {
+      "id": "petroleum",
+      "navn": "Petroleumsskatter",
+      "belop": 380500000000,
+      "farge": "#181C62"
+    },
+    {
+      "id": "arbeidsgiveravgift",
+      "navn": "Arbeidsgiveravgift",
+      "belop": 269420000000,
+      "farge": "#008286"
+    },
+    {
+      "id": "trygdeavgift",
+      "navn": "Trygdeavgift",
+      "belop": 197314500000,
+      "farge": "#97499C"
+    },
+    {
+      "id": "spu_inn",
+      "navn": "Overføring fra SPU",
+      "belop": 413647646000,
+      "farge": "#FFDF4F",
+      "type": "spu"
+    }
+  ],
+  "spu": {
+    "overfoering_til_fond": 642769100000,
+    "finansposter_til_fond": 82100000000,
+    "overfoering_fra_fond": 413647646000,
+    "netto_overfoering": 311221454000
+  }
+}

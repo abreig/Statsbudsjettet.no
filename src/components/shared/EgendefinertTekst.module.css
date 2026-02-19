@@ -1,0 +1,53 @@
+.seksjon {
+  padding: var(--space-8) var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.breddeNormal {
+  max-width: var(--innhold-bred);
+  margin: 0 auto;
+}
+
+.breddeSmal {
+  max-width: var(--innhold-smal);
+  margin: 0 auto;
+}
+
+.breddeBred {
+  max-width: var(--innhold-maks);
+  margin: 0 auto;
+}
+
+.overskrift {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-2xl);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+  margin-bottom: var(--space-4);
+}
+
+.innhold {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-base);
+  color: var(--tekst-primaer);
+  line-height: var(--linjehoyde-normal);
+}
+
+.innhold p {
+  margin-bottom: var(--space-3);
+}
+
+.innhold a {
+  color: var(--reg-blaa);
+  text-decoration: underline;
+}
+
+.innhold ul,
+.innhold ol {
+  padding-left: var(--space-5);
+  margin-bottom: var(--space-3);
+}
+
+.innhold li {
+  margin-bottom: var(--space-1);
+}
