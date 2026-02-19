@@ -5,56 +5,61 @@
       "id": "folketrygden",
       "navn": "Folketrygden",
       "belop": 701915317000,
-      "farge": "#181C62"
+      "omr_gruppe": [
+        28,
+        29,
+        30,
+        33
+      ],
+      "farge": "#0C1045"
     },
     {
       "id": "ovrige_utgifter",
       "navn": "Øvrige utgifter",
       "belop": 522197982000,
-      "farge": "#EDEDEE"
+      "farge": "#181C62"
     },
     {
       "id": "kommuner",
       "navn": "Kommuner og distrikter",
       "belop": 290493267000,
-      "farge": "#4156A6"
+      "omr_nr": 13,
+      "farge": "#263080"
     },
     {
       "id": "helse",
       "navn": "Helse og omsorg",
       "belop": 248109015000,
-      "farge": "#F15D61"
+      "omr_nr": 10,
+      "farge": "#354A9E"
     },
     {
       "id": "kunnskap",
       "navn": "Kunnskapsformål",
       "belop": 144718634000,
-      "farge": "#5B91CC"
+      "omr_nr": 7,
+      "farge": "#4A65B5"
     },
     {
       "id": "naering",
       "navn": "Næring og fiskeri",
       "belop": 134331771000,
-      "farge": "#008286"
+      "omr_nr": 17,
+      "farge": "#6580C5"
     },
     {
       "id": "forsvar",
       "navn": "Forsvar",
       "belop": 110069526000,
-      "farge": "#97499C"
+      "omr_nr": 4,
+      "farge": "#839DD5"
     },
     {
       "id": "transport",
       "navn": "Innenlands transport",
       "belop": 94178400000,
-      "farge": "#60C3AD"
-    },
-    {
-      "id": "spu_ut",
-      "navn": "Overføring til SPU",
-      "belop": 724869100000,
-      "farge": "#FFDF4F",
-      "type": "spu"
+      "omr_nr": 21,
+      "farge": "#A8BAE2"
     }
   ],
   "inntekter_aggregert": [
@@ -62,50 +67,67 @@
       "id": "ovrige_inntekter",
       "navn": "Øvrige inntekter",
       "belop": 696578383000,
-      "farge": "#EDEDEE"
+      "farge": "#004D52"
     },
     {
       "id": "skatt_person",
       "navn": "Skatt på inntekt og formue",
       "belop": 430063300000,
-      "farge": "#4156A6"
+      "farge": "#006B73"
     },
     {
       "id": "mva",
       "navn": "Merverdiavgift",
       "belop": 409258000000,
-      "farge": "#F15D61"
+      "farge": "#008286"
     },
     {
       "id": "petroleum",
       "navn": "Petroleumsskatter",
       "belop": 380500000000,
-      "farge": "#181C62"
+      "farge": "#2A9D8F"
     },
     {
       "id": "arbeidsgiveravgift",
       "navn": "Arbeidsgiveravgift",
       "belop": 269420000000,
-      "farge": "#008286"
+      "farge": "#5AB8AD"
     },
     {
       "id": "trygdeavgift",
       "navn": "Trygdeavgift",
       "belop": 197314500000,
-      "farge": "#97499C"
-    },
-    {
-      "id": "spu_inn",
-      "navn": "Overføring fra SPU",
-      "belop": 413647646000,
-      "farge": "#FFDF4F",
-      "type": "spu"
+      "farge": "#5AB8AD"
     }
   ],
   "spu": {
     "overfoering_til_fond": 642769100000,
     "finansposter_til_fond": 82100000000,
     "overfoering_fra_fond": 413647646000,
-    "netto_overfoering": 311221454000
+    "netto_overfoering": 311221454000,
+    "fondsuttak": 413647646000,
+    "netto_kontantstrom": 724869100000,
+    "kontantstrom_kilder": [
+      {
+        "id": "petskatt",
+        "navn": "Petroleumsskatter",
+        "belop": 380500000000
+      },
+      {
+        "id": "sdfi",
+        "navn": "SDFI",
+        "belop": 256100000000
+      },
+      {
+        "id": "equinor",
+        "navn": "Equinor-utbytte",
+        "belop": 27768100000
+      },
+      {
+        "id": "andre_petro",
+        "navn": "Andre petroleumsinnt.",
+        "belop": 60501000000
+      }
+    ]
   }
 }

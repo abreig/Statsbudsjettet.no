@@ -23,9 +23,65 @@ export interface CMSTema {
   budsjettlenker: { omrNr: number; visningsnavn: string; datareferanse: string }[];
 }
 
+/** Tilgjengelige budsjettår i CMS */
+export const TILGJENGELIGE_AAR = [2025, 2024, 2023, 2022, 2021, 2020, 2019];
+
 export function hentMockCMSData(aar: number): CMSBudsjettaar | null {
   if (aar === 2025) return MOCK_2025;
+  if (TILGJENGELIGE_AAR.includes(aar)) return genererHistoriskMock(aar);
   return null;
+}
+
+/**
+ * Genererer forenklet CMS-data for historiske år.
+ * Kun hero + budsjettgrafer + nøkkeltall-moduler, ingen temaer.
+ */
+function genererHistoriskMock(aar: number): CMSBudsjettaar {
+  return {
+    aar,
+    status: "approved",
+    moduler: [
+      {
+        type: "hero",
+        synlig: true,
+        rekkefolge: 0,
+        konfigurasjon: {
+          tittel: `Statsbudsjettet ${aar}`,
+          undertittel: "Regjeringens forslag til statsbudsjett",
+          nokkeltall: [
+            { etikett: "Totale utgifter", datareferanse: "utgifter.total" },
+            { etikett: "Totale inntekter", datareferanse: "inntekter.total" },
+            { etikett: "Overføring fra oljefondet", datareferanse: "spu.overfoering_fra_fond" },
+          ],
+        },
+      },
+      {
+        type: "budsjettgrafer",
+        synlig: true,
+        rekkefolge: 1,
+        konfigurasjon: {
+          overskrift: "Budsjettet i tall",
+          forklaringstekst: `Statsbudsjettet ${aar} viser regjeringens forslag til hvordan fellesskapets midler skal brukes.`,
+        },
+      },
+      {
+        type: "nokkeltall",
+        synlig: true,
+        rekkefolge: 2,
+        konfigurasjon: {
+          tittel: "Nøkkeltall",
+          layout: "horisontal",
+          tall: [
+            { etikett: "Totale utgifter", datareferanse: "utgifter.total" },
+            { etikett: "Totale inntekter", datareferanse: "inntekter.total" },
+            { etikett: "Overføring til SPU", datareferanse: "spu.overfoering_til_fond" },
+            { etikett: "Overføring fra SPU", datareferanse: "spu.overfoering_fra_fond" },
+          ],
+        },
+      },
+    ],
+    temaer: [],
+  };
 }
 
 const MOCK_2025: CMSBudsjettaar = {

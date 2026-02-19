@@ -1,0 +1,39 @@
+{
+  "budsjettaar": 2024,
+  "publisert": "2026-02-19",
+  "kilde": "Gul bok 2024",
+  "saldert_budsjett_forrige": "2023",
+  "totaler": {
+    "utgifter": 2938608883000,
+    "inntekter": 2838891130000
+  },
+  "spu": {
+    "overfoering_til_fond": 832165500000,
+    "finansposter_til_fond": 0,
+    "overfoering_fra_fond": 336484232000,
+    "netto_overfoering": 495681268000,
+    "fondsuttak": 336484232000,
+    "netto_kontantstrom": 850365400000,
+    "kontantstrom_kilder": [
+      {
+        "id": "petskatt",
+        "navn": "Petroleumsskatter",
+        "belop": 483800000000
+      },
+      {
+        "id": "sdfi",
+        "navn": "SDFI",
+        "belop": 328300000000
+      },
+      {
+        "id": "equinor",
+        "navn": "Equinor-utbytte",
+        "belop": 38265400000
+      }
+    ]
+  },
+  "antall_poster": {
+    "utgifter": null,
+    "inntekter": null
+  }
+}

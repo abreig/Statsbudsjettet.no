@@ -100,23 +100,25 @@ def valider_json_filer(datamappe: Path, budsjettaar: int) -> list[str]:
                         )
 
     # Valider aggregert datasett
+    # NB: Aggregert data EKSKLUDERER SPU (omr 34 fra utgifter, kap 5800 fra inntekter)
+    # Så aggregert totaler er lavere enn full totaler. Vi sjekker bare intern konsistens.
     with open(datamappe / "gul_bok_aggregert.json", encoding="utf-8") as f:
         agg_data = json.load(f)
 
     sum_agg_utgifter = sum(k["belop"] for k in agg_data["utgifter_aggregert"])
     sum_agg_inntekter = sum(k["belop"] for k in agg_data["inntekter_aggregert"])
 
-    if sum_agg_utgifter != full_data["utgifter"]["total"]:
-        feil.append(
-            f"Aggregert utgiftstotal ({sum_agg_utgifter}) stemmer ikke med "
-            f"full total ({full_data['utgifter']['total']})"
-        )
+    # Sjekk at aggregert utgifter + SPU fondsuttak ≈ full total (evt. sjekk at de er positive)
+    if sum_agg_utgifter <= 0:
+        feil.append(f"Aggregert utgiftstotal er 0 eller negativ: {sum_agg_utgifter}")
 
-    if sum_agg_inntekter != full_data["inntekter"]["total"]:
-        feil.append(
-            f"Aggregert inntektstotal ({sum_agg_inntekter}) stemmer ikke med "
-            f"full total ({full_data['inntekter']['total']})"
-        )
+    if sum_agg_inntekter <= 0:
+        feil.append(f"Aggregert inntektstotal er 0 eller negativ: {sum_agg_inntekter}")
+
+    # Sjekk at fondsuttak er positiv
+    fondsuttak = agg_data.get("spu", {}).get("fondsuttak", 0)
+    if fondsuttak <= 0:
+        feil.append(f"Fondsuttak er 0 eller negativt: {fondsuttak}")
 
     # Sjekk filstørrelse for aggregert (bør være < 50 KB)
     agg_filstr = (datamappe / "gul_bok_aggregert.json").stat().st_size

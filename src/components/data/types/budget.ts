@@ -77,11 +77,20 @@ export interface BudgetSide {
 // SPU (Statens pensjonsfond utland)
 // ---------------------------------------------------------------------------
 
+export interface KontantstromKilde {
+  id: string;
+  navn: string;
+  belop: number;
+}
+
 export interface SPUData {
   overfoering_til_fond: number;
   finansposter_til_fond: number;
   overfoering_fra_fond: number;
   netto_overfoering: number;
+  fondsuttak: number;
+  netto_kontantstrom: number;
+  kontantstrom_kilder: KontantstromKilde[];
 }
 
 // ---------------------------------------------------------------------------
@@ -116,8 +125,8 @@ export interface AggregertKategori {
   navn: string;
   belop: number;
   farge: string;
-  type?: "spu";
   omr_nr?: number;
+  omr_gruppe?: number[];
 }
 
 export interface AggregertBudsjett {

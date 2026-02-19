@@ -1,0 +1,39 @@
+{
+  "budsjettaar": 2019,
+  "publisert": "2026-02-19",
+  "kilde": "Gul bok 2019",
+  "saldert_budsjett_forrige": "2018",
+  "totaler": {
+    "utgifter": 1852351253000,
+    "inntekter": 1775208082000
+  },
+  "spu": {
+    "overfoering_til_fond": 285822000000,
+    "finansposter_til_fond": 0,
+    "overfoering_fra_fond": 232494395000,
+    "netto_overfoering": 53327605000,
+    "fondsuttak": 23815566000,
+    "netto_kontantstrom": 307220000000,
+    "kontantstrom_kilder": [
+      {
+        "id": "petskatt",
+        "navn": "Petroleumsskatter",
+        "belop": 157700000000
+      },
+      {
+        "id": "sdfi",
+        "navn": "SDFI",
+        "belop": 132900000000
+      },
+      {
+        "id": "equinor",
+        "navn": "Equinor-utbytte",
+        "belop": 16620000000
+      }
+    ]
+  },
+  "antall_poster": {
+    "utgifter": null,
+    "inntekter": null
+  }
+}

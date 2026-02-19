@@ -86,8 +86,33 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
 
 if __name__ == "__main__":
     rotmappe = Path(__file__).parent.parent
-    kildefil = rotmappe / "Gul bok 2025.xlsx"
-    utmappe = rotmappe / "data" / "2025"
 
-    suksess = kjor_pipeline(kildefil, 2025, utmappe)
-    sys.exit(0 if suksess else 1)
+    # Støtt årstall som CLI-argument, eller kjør for alle tilgjengelige år
+    if len(sys.argv) > 1:
+        aar_liste = [int(a) for a in sys.argv[1:]]
+    else:
+        # Finn alle Gul bok-filer automatisk
+        aar_liste = sorted(
+            int(f.stem.split()[-1])
+            for f in rotmappe.glob("Gul bok *.xlsx")
+        )
+
+    if not aar_liste:
+        print("Ingen Gul bok-filer funnet!")
+        sys.exit(1)
+
+    alle_ok = True
+    for aar in aar_liste:
+        kildefil = rotmappe / f"Gul bok {aar}.xlsx"
+        utmappe = rotmappe / "data" / str(aar)
+
+        if not kildefil.exists():
+            print(f"Finner ikke {kildefil}, hopper over.")
+            continue
+
+        suksess = kjor_pipeline(kildefil, aar, utmappe)
+        if not suksess:
+            alle_ok = False
+        print()
+
+    sys.exit(0 if alle_ok else 1)

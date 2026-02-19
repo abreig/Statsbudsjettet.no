@@ -1,35 +1,7 @@
-.overlay {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: rgba(0, 0, 0, 0.3);
-  z-index: var(--z-overlay);
-}
+/* DrillDownPanel — nå rendret inne i ModalOverlay */
 
 .panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 520px;
-  max-width: 100%;
-  background-color: var(--bg-hvit);
-  z-index: var(--z-modal);
-  overflow-y: auto;
-  box-shadow: var(--skygge-lg);
   padding: var(--space-5);
-  animation: slideIn var(--varighet-normal) var(--easing-ut);
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
 }
 
 .header {
@@ -105,19 +77,26 @@
 }
 
 .kategoriItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
   border: 1px solid var(--reg-lysgraa);
   border-radius: var(--radius-md);
-  cursor: pointer;
   transition: background-color var(--varighet-rask) var(--easing-standard);
-  font-family: var(--font-sans);
 }
 
 .kategoriItem:hover {
   background-color: var(--bg-sand);
+}
+
+.kategoriKnapp {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  text-align: left;
 }
 
 .kategoriBar {
@@ -152,16 +131,24 @@
   flex-shrink: 0;
 }
 
+.kategoriPil {
+  font-size: var(--tekst-lg);
+  color: var(--tekst-deaktivert);
+  flex-shrink: 0;
+  transition: transform var(--varighet-rask) var(--easing-standard);
+}
+
+.kategoriKnapp:hover .kategoriPil {
+  transform: translateX(4px);
+  color: var(--reg-blaa);
+}
+
 /* Tabellvisning med responsiv kortvisning */
 .postTabell {
   overflow-x: auto;
 }
 
 @media (max-width: 640px) {
-  .panel {
-    width: 100%;
-  }
-
   /* Tabell kollapser til kortvisning på mobil */
   .postTabell table thead {
     display: none;
