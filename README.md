@@ -2,6 +2,71 @@
 
 Publikasjonsplattform som presenterer det norske statsbudsjettet for allmennheten. Kombinerer regjeringens politiske budskap med faktiske budsjettall i en interaktiv, tilgjengelig nettopplevelse.
 
+## Hurtigstart med GitHub Codespaces
+
+> **Alt er ferdig konfigurert.** Codespaces installerer avhengigheter, starter PostgreSQL, oppretter databasen og seeder testdata automatisk. Du trenger bare å trykke to knapper.
+
+### 1. Åpne Codespace
+
+Klikk **Code → Codespaces → Create codespace on main** (eller den branchen du vil jobbe med).
+
+Vent til terminalen viser:
+
+```
+============================================
+  Miljøet er klart!
+
+  Start utviklingsserveren:
+    npm run dev
+
+  Nettside:    http://localhost:3000
+  Admin-panel: http://localhost:3000/admin
+    → Logg inn med admin@dev.local
+============================================
+```
+
+### 2. Start serveren
+
+```bash
+npm run dev
+```
+
+Codespaces åpner automatisk en nettleserfane med nettsiden.
+
+### 3. Åpne admin-panelet
+
+Gå til `/admin` i nettleseren. På innloggingssiden:
+
+1. Bruk **Utviklingsmodus**-feltet nederst
+2. Skriv `admin@dev.local`
+3. Klikk **Logg inn som utvikler**
+
+Ferdig — du har full administratortilgang.
+
+### Testbrukere (seed-data)
+
+| E-post | Rolle |
+|--------|-------|
+| `admin@dev.local` | Administrator (full tilgang) |
+| `redaktor@dev.local` | Redaktør |
+
+## Hva devcontaineren setter opp
+
+Filen `.devcontainer/setup.sh` kjøres automatisk ved opprettelse og gjør:
+
+1. `npm ci` — installerer alle avhengigheter
+2. Starter PostgreSQL 16 og oppretter database `statsbudsjettet`
+3. Genererer `.env` med lokal Postgres-URL og tilfeldig `NEXTAUTH_SECRET`
+4. `prisma generate` + `prisma db push` — oppretter tabeller
+5. `prisma/seed.ts` — fyller databasen med budsjettår 2025, moduler, temaer og nøkkeltall
+6. Installerer Python-avhengigheter for datapipelinen (hvis `pipeline/requirements.txt` finnes)
+
+Dersom noe feiler, kan du kjøre scriptet manuelt:
+
+```bash
+bash .devcontainer/setup.sh
+```
+
 ## Teknisk stack
 
 | Lag | Teknologi |
@@ -13,78 +78,29 @@ Publikasjonsplattform som presenterer det norske statsbudsjettet for allmennhete
 | Datapipeline | Python (pandas, openpyxl) |
 | Testing | Vitest + Testing Library |
 
-## Kom i gang
+## Lokalt oppsett (uten Codespaces)
 
-### 1. Installer avhengigheter
+Dersom du foretrekker å kjøre lokalt trenger du Node 20, PostgreSQL 16 og Python 3.12.
 
 ```bash
+# 1. Installer avhengigheter
 npm install
-```
 
-### 2. Sett opp miljøvariabler
-
-Kopier `.env.example` og fyll inn verdiene:
-
-```bash
+# 2. Opprett .env (rediger DATABASE_URL til din lokale Postgres)
 cp .env.example .env
-```
 
-Nødvendige variabler:
-
-| Variabel | Beskrivelse |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL-tilkoblingsstreng |
-| `NEXTAUTH_SECRET` | Tilfeldig hemmelig nøkkel for sesjoner |
-| `NEXTAUTH_URL` | Applikasjonens URL (f.eks. `http://localhost:3000`) |
-| `AZURE_AD_CLIENT_ID` | Azure Entra ID klient-ID (valgfritt i utvikling) |
-| `AZURE_AD_CLIENT_SECRET` | Azure Entra ID hemmelighet (valgfritt i utvikling) |
-| `AZURE_AD_TENANT_ID` | Azure Entra ID tenant-ID (valgfritt i utvikling) |
-
-### 3. Sett opp databasen
-
-```bash
-# Generer Prisma-klient
+# 3. Sett opp databasen
 npm run db:generate
-
-# Kjør migrasjoner (krever kjørende PostgreSQL)
 npm run db:migrate
-
-# Fyll databasen med testdata
 npm run db:seed
-```
 
-### 4. Start utviklingsserveren
-
-```bash
+# 4. Start serveren
 npm run dev
 ```
 
-Åpne [http://localhost:3000](http://localhost:3000) for den offentlige nettsiden.
-
 ## Admin-panel (CMS)
 
-Admin-panelet er tilgjengelig på [http://localhost:3000/admin](http://localhost:3000/admin).
-
-### Tilgang i utviklingsmodus
-
-I utviklingsmodus kan du logge inn uten Azure AD:
-
-1. Gå til [http://localhost:3000/admin](http://localhost:3000/admin)
-2. Du blir redirectet til innloggingssiden
-3. Bruk feltet **Utviklingsmodus** nederst på siden
-4. Skriv inn `admin@dev.local` (eller en annen e-postadresse)
-5. Klikk **Logg inn som utvikler**
-
-Seed-scriptet oppretter to testbrukere:
-
-| E-post | Rolle |
-|--------|-------|
-| `admin@dev.local` | Administrator (full tilgang) |
-| `redaktor@dev.local` | Redaktør |
-
-### Tilgang i produksjon
-
-I produksjon brukes Azure Entra ID (OIDC). Brukere logger inn med sin departementskonto via «Logg inn med departementskonto»-knappen.
+Admin-panelet er tilgjengelig på `/admin`.
 
 ### Admin-sider
 
@@ -111,17 +127,19 @@ I produksjon brukes Azure Entra ID (OIDC). Brukere logger inn med sin departemen
 
 ### Publiseringsflyt
 
-Innhold følger en statusmaskin:
-
 ```
 kladd → til_godkjenning → godkjent → publisert
 ```
 
-Fra «godkjent» kan man enten publisere umiddelbart eller sette et tidspunkt for automatisk publisering (via cron-jobben `/api/publiser-cron`).
+Fra «godkjent» kan man publisere umiddelbart eller sette et tidspunkt for automatisk publisering via cron-jobben `/api/publiser-cron`.
 
 ### Forhåndsvisning
 
-Fra publiseringssiden kan redaktører åpne en forhåndsvisning som viser innholdet slik det vil se ut for besøkende. Forhåndsvisningen oppdateres automatisk via Server-Sent Events når innhold lagres.
+Fra publiseringssiden kan redaktører åpne en forhåndsvisning som oppdateres automatisk via Server-Sent Events når innhold lagres.
+
+### Tilgang i produksjon
+
+I produksjon brukes Azure Entra ID (OIDC). Sett `AZURE_AD_CLIENT_ID`, `AZURE_AD_CLIENT_SECRET` og `AZURE_AD_TENANT_ID` i miljøvariablene.
 
 ## Scripts
 
@@ -151,44 +169,39 @@ Se `DATA.md` for detaljert dokumentasjon av datamodellen.
 ## Prosjektstruktur
 
 ```
+.devcontainer/
+├── devcontainer.json         # Codespaces-konfigurasjon
+└── setup.sh                  # Automatisk oppsett (db, env, seed)
 src/
 ├── app/
-│   ├── page.tsx                  # Forside (redirect til gjeldende år)
-│   ├── [aar]/                    # Offentlig budsjettårside
-│   ├── admin/                    # Admin-panel (CMS)
-│   │   ├── layout.tsx            # Admin-layout med navigasjon
-│   │   ├── budsjettaar/          # Budsjettår-administrasjon
-│   │   ├── moduler/[aarstall]/   # Modul-editor (drag-and-drop)
-│   │   ├── temaer/[aarstall]/    # Tema-editor
-│   │   ├── nokkeltall/[aarstall]/ # Nøkkeltall-editor
-│   │   ├── programomraader/      # Programområde-editor
-│   │   ├── media/                # Mediebibliotek
-│   │   ├── brukere/              # Brukeradministrasjon
-│   │   └── publisering/          # Publiseringsflyt
-│   ├── api/                      # API-ruter
-│   │   ├── auth/[...nextauth]/   # NextAuth-endepunkt
-│   │   ├── draft-aktiver/        # Aktiver Draft Mode
-│   │   ├── preview-events/       # SSE for forhåndsvisning
-│   │   └── publiser-cron/        # Tidsstyrt publisering
-│   └── preview/[aarstall]/       # Forhåndsvisning
+│   ├── page.tsx              # Forside (redirect til gjeldende år)
+│   ├── [aar]/                # Offentlig budsjettårside
+│   ├── admin/                # Admin-panel (CMS)
+│   │   ├── layout.tsx        # Admin-layout med navigasjon
+│   │   ├── budsjettaar/      # Budsjettår-administrasjon
+│   │   ├── moduler/          # Modul-editor (drag-and-drop)
+│   │   ├── temaer/           # Tema-editor
+│   │   ├── nokkeltall/       # Nøkkeltall-editor
+│   │   ├── programomraader/  # Programområde-editor
+│   │   ├── media/            # Mediebibliotek
+│   │   ├── brukere/          # Brukeradministrasjon
+│   │   └── publisering/      # Publiseringsflyt
+│   ├── api/                  # API-ruter
+│   └── preview/              # Forhåndsvisning
 ├── components/
-│   ├── admin/                    # TipTapEditor, CmsAnnotert
-│   ├── budget/                   # Budsjettvisualisering
-│   ├── hero/                     # Hero-seksjon
-│   ├── plan/                     # Plan for Norge
-│   ├── layout/                   # Header, Footer, navigasjon
-│   └── shared/                   # Delte komponenter
+│   ├── admin/                # TipTapEditor, CmsAnnotert
+│   ├── budget/               # Budsjettvisualisering
+│   └── ...
 ├── lib/
-│   ├── auth.ts                   # NextAuth-konfigurasjon
-│   ├── db.ts                     # Prisma-klient (singleton)
-│   ├── requireSession.ts         # Sesjons- og rollesjekk
-│   ├── revisjonslogg.ts          # Endringslogging
-│   ├── datareferanse.ts          # Oppløs CMS-datareferanser
-│   └── types/cms.ts              # CMS TypeScript-typer
-└── middleware.ts                 # Auth-middleware for /admin
+│   ├── auth.ts               # NextAuth-konfigurasjon
+│   ├── db.ts                 # Prisma-klient (singleton)
+│   ├── requireSession.ts     # Sesjons- og rollesjekk
+│   ├── datareferanse.ts      # Oppløs CMS-datareferanser
+│   └── types/cms.ts          # CMS TypeScript-typer
+└── middleware.ts              # Auth-middleware for /admin
 prisma/
-├── schema.prisma                 # Databaseskjema
-└── seed.ts                       # Testdata
+├── schema.prisma             # Databaseskjema
+└── seed.ts                   # Testdata
 ```
 
 ## Dokumentasjon
