@@ -58,3 +58,6 @@ src/generated/
 
 # Medieupploads
 public/uploads/
+
+# Midlertidig stash fra statisk bygge-script
+.static-build-stash/

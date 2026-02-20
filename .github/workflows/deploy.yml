@@ -30,9 +30,9 @@ jobs:
         run: npm ci
 
       - name: Bygg statisk eksport
-        run: npm run build
+        run: npm run build:static
         env:
-          BASE_PATH: /statsbudsjettet
+          BASE_PATH: /Statsbudsjettet.no
 
       - name: Konfigurer Pages
         uses: actions/configure-pages@v4
