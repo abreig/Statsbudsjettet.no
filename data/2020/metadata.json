@@ -1,6 +1,6 @@
 {
   "budsjettaar": 2020,
-  "publisert": "2026-02-19",
+  "publisert": "2026-02-20",
   "kilde": "Gul bok 2020",
   "saldert_budsjett_forrige": "2019",
   "totaler": {
@@ -12,7 +12,7 @@
     "finansposter_til_fond": 0,
     "overfoering_fra_fond": 232494395000,
     "netto_overfoering": 53327605000,
-    "fondsuttak": 232494395000,
+    "fondsuttak": 331035566000,
     "netto_kontantstrom": 307220000000,
     "kontantstrom_kilder": [
       {

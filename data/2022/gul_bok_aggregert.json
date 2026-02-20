@@ -64,15 +64,15 @@
   ],
   "inntekter_aggregert": [
     {
-      "id": "ovrige_inntekter",
-      "navn": "Øvrige inntekter",
-      "belop": 457533136000,
-      "farge": "#004D52"
-    },
-    {
       "id": "mva",
       "navn": "Merverdiavgift",
       "belop": 360500000000,
+      "farge": "#004D52"
+    },
+    {
+      "id": "ovrige_inntekter",
+      "navn": "Øvrige inntekter",
+      "belop": 321833136000,
       "farge": "#006B73"
     },
     {
@@ -92,12 +92,6 @@
       "navn": "Trygdeavgift",
       "belop": 166412400000,
       "farge": "#5AB8AD"
-    },
-    {
-      "id": "petroleum",
-      "navn": "Petroleumsskatter",
-      "belop": 161600000000,
-      "farge": "#5AB8AD"
     }
   ],
   "spu": {
@@ -105,7 +99,7 @@
     "finansposter_til_fond": 70000000000,
     "overfoering_fra_fond": 300255117000,
     "netto_overfoering": 46845883000,
-    "fondsuttak": 300255117000,
+    "fondsuttak": 344336232000,
     "netto_kontantstrom": 347101000000,
     "kontantstrom_kilder": [
       {

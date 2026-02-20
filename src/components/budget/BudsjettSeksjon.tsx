@@ -123,10 +123,10 @@ const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
           <strong>Slik fungerer fondsmekanismen:</strong> Statens inntekter fra
           petroleumsvirksomheten overføres i sin helhet til Statens pensjonsfond
           utland (SPU). For å dekke det oljekorrigerte underskuddet på
-          statsbudsjettet, overføres et beløp tilbake fra fondet. Denne
-          overføringen tilsvarer {formaterBelop(data.spu.fondsuttak)} og styres av
-          handlingsregelen, som tilsier at man over tid ikke skal bruke mer enn
-          den forventede realavkastningen av fondet (anslått til 3 %).
+          statsbudsjettet — {formaterBelop(data.spu.fondsuttak)} — overføres et
+          beløp tilbake fra fondet. Uttaket styres av handlingsregelen, som
+          tilsier at man over tid ikke skal bruke mer enn den forventede
+          realavkastningen av fondet (anslått til 3 %).
         </div>
 
         {/* Drill-down modal */}

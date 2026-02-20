@@ -120,6 +120,14 @@ def valider_json_filer(datamappe: Path, budsjettaar: int) -> list[str]:
     if fondsuttak <= 0:
         feil.append(f"Fondsuttak er 0 eller negativt: {fondsuttak}")
 
+    # Sjekk at barene balanserer: utgifter_ord = inntekter_ord + fondsuttak
+    if abs(sum_agg_utgifter - sum_agg_inntekter - fondsuttak) > 1000:
+        feil.append(
+            f"Barer balanserer ikke: utg={sum_agg_utgifter}, "
+            f"inn={sum_agg_inntekter}, fond={fondsuttak}, "
+            f"diff={sum_agg_utgifter - sum_agg_inntekter - fondsuttak}"
+        )
+
     # Sjekk filstørrelse for aggregert (bør være < 50 KB)
     agg_filstr = (datamappe / "gul_bok_aggregert.json").stat().st_size
     if agg_filstr > 50 * 1024:

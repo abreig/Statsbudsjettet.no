@@ -112,6 +112,7 @@ export default function DrillDownPanel({
         <KategoriListe
           items={data.kategorier.map((k) => ({
             id: k.kat_nr,
+            prefiks: `Kat. ${String(k.kat_nr).replace(/^(\d{2})(\d{2})$/, "$1.$2")}`,
             navn: k.navn,
             belop: k.total,
             data: k,
@@ -121,7 +122,7 @@ export default function DrillDownPanel({
             navigerDypere(item.data as Programkategori, {
               nivaa: 3,
               id: item.id,
-              navn: item.navn,
+              navn: item.prefiks ? `${item.prefiks} ${item.navn}` : item.navn,
             })
           }
         />
@@ -131,6 +132,7 @@ export default function DrillDownPanel({
         <KategoriListe
           items={data.kapitler.map((k) => ({
             id: k.kap_nr,
+            prefiks: `Kap. ${k.kap_nr}`,
             navn: k.navn,
             belop: k.total,
             data: k,
@@ -140,7 +142,7 @@ export default function DrillDownPanel({
             navigerDypere(item.data as Kapittel, {
               nivaa: 4,
               id: item.id,
-              navn: item.navn,
+              navn: item.prefiks ? `${item.prefiks} ${item.navn}` : item.navn,
             })
           }
         />
@@ -155,6 +157,7 @@ export default function DrillDownPanel({
 
 interface KategoriItemData {
   id: number;
+  prefiks?: string;
   navn: string;
   belop: number;
   data: Programkategori | Kapittel;
@@ -189,7 +192,12 @@ function KategoriListe({
               aria-hidden="true"
             />
             <div className={styles.kategoriInfo}>
-              <div className={styles.kategoriNavn}>{item.navn}</div>
+              <div className={styles.kategoriNavn}>
+                {item.prefiks && (
+                  <span className={styles.kategoriPrefiks}>{item.prefiks}</span>
+                )}
+                {item.navn}
+              </div>
               <div className={styles.kategoriBelop}>
                 {formaterBelop(item.belop)}
               </div>

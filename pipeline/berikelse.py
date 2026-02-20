@@ -30,6 +30,10 @@ SPU_BLA = "#2C4F8A"
 # Folketrygdens programområder
 FOLKETRYGD_OMRAADER = {28, 29, 30, 33}
 
+# Petroleumskapitler som ekskluderes fra ordinære inntekter
+# (kanaliseres gjennom SPU-sonen i grafen)
+PETROLEUM_KAP = {5507, 5440, 5685}
+
 
 def beregn_spu(df: pd.DataFrame) -> dict:
     """Isolerer SPU-poster og beregner nøkkeltall inkl. kontantstrøm-kilder."""
@@ -166,7 +170,8 @@ def generer_aggregert_utgifter(df: pd.DataFrame) -> list[dict]:
 
 def generer_aggregert_inntekter(df: pd.DataFrame) -> list[dict]:
     """Genererer aggregert inntektskategorier for stacked barplot.
-    EKSKLUDERER SPU-overføring (kap 5800) iht. DESIGN_OPPDATERING.md."""
+    EKSKLUDERER SPU-overføring (kap 5800) og alle petroleumsinntekter
+    (kap 5507, 5440, 5685) — disse kanaliseres gjennom SPU-sonen."""
     inntekter = df[df["side"] == "inntekt"]
 
     # Skatter og avgifter (omr 25)
@@ -189,24 +194,23 @@ def generer_aggregert_inntekter(df: pd.DataFrame) -> list[dict]:
         ]["GB"].sum()
     )
 
-    # Petroleumsskatter (kap 5507) — EKSKLUDERES fra ordinære inntekter
-    # (håndteres i SPU-sonen som kontantstrøm)
-    petroleum_belop = int(skatt_omr[skatt_omr["kap_nr"] == 5507]["GB"].sum())
-
     # Skatt på inntekt og formue (kap 5501)
     skatt_person_belop = int(
         skatt_omr[skatt_omr["kap_nr"] == 5501]["GB"].sum()
     )
 
-    # Øvrige inntekter: totalt MINUS kap. 5800 MINUS alle kjente
-    totalt_uten_spu = int(inntekter[inntekter["kap_nr"] != 5800]["GB"].sum())
-    kjent_sum = mva_belop + arb_avg_belop + trygd_belop + petroleum_belop + skatt_person_belop
-    ovrige_belop = totalt_uten_spu - kjent_sum
+    # Øvrige inntekter: totalt MINUS kap 5800 MINUS petroleumskapitler MINUS kjente
+    totalt_uten_spu_og_petro = int(
+        inntekter[
+            ~inntekter["kap_nr"].isin({5800} | PETROLEUM_KAP)
+        ]["GB"].sum()
+    )
+    kjent_sum = mva_belop + arb_avg_belop + trygd_belop + skatt_person_belop
+    ovrige_belop = totalt_uten_spu_og_petro - kjent_sum
 
     kategorier = [
         {"id": "skatt_person", "navn": "Skatt på inntekt og formue", "belop": skatt_person_belop},
         {"id": "mva", "navn": "Merverdiavgift", "belop": mva_belop},
-        {"id": "petroleum", "navn": "Petroleumsskatter", "belop": petroleum_belop},
         {"id": "arbeidsgiveravgift", "navn": "Arbeidsgiveravgift", "belop": arb_avg_belop},
         {"id": "trygdeavgift", "navn": "Trygdeavgift", "belop": trygd_belop},
         {"id": "ovrige_inntekter", "navn": "Øvrige inntekter", "belop": ovrige_belop},
