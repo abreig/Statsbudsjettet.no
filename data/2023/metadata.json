@@ -1,6 +1,6 @@
 {
   "budsjettaar": 2023,
-  "publisert": "2026-02-19",
+  "publisert": "2026-02-20",
   "kilde": "Gul bok 2023",
   "saldert_budsjett_forrige": "2022",
   "totaler": {
@@ -12,7 +12,7 @@
     "finansposter_til_fond": 0,
     "overfoering_fra_fond": 257048499000,
     "netto_overfoering": 1127252501000,
-    "fondsuttak": 257048499000,
+    "fondsuttak": 281683042000,
     "netto_kontantstrom": 1405300000000,
     "kontantstrom_kilder": [
       {

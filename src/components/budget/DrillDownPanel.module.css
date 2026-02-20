@@ -118,6 +118,18 @@
   margin-bottom: 2px;
 }
 
+.kategoriPrefiks {
+  display: inline-block;
+  font-family: var(--font-tall);
+  font-size: var(--tekst-xs);
+  color: var(--reg-blaa);
+  background: color-mix(in srgb, var(--reg-blaa) 8%, transparent);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  margin-right: var(--space-1);
+  vertical-align: baseline;
+}
+
 .kategoriBelop {
   font-family: var(--font-tall);
   font-size: var(--tekst-sm);

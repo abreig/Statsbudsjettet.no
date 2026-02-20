@@ -46,6 +46,14 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
 
     utgifter_agg = generer_aggregert_utgifter(df)
     inntekter_agg = generer_aggregert_inntekter(df)
+
+    # Beregn fondsuttak som balanseringspost (oljekorrigert underskudd)
+    # slik at barene i grafen balanserer: utg_ord = inn_ord + fondsuttak
+    sum_utg = sum(k["belop"] for k in utgifter_agg)
+    sum_inn = sum(k["belop"] for k in inntekter_agg)
+    spu["fondsuttak"] = sum_utg - sum_inn
+    print(f"  Fondsuttak (oljekorrigert underskudd): {spu['fondsuttak'] / 1e9:.1f} mrd. kr")
+
     print(f"  Aggregerte utgiftskategorier: {len(utgifter_agg)}")
     print(f"  Aggregerte inntektskategorier: {len(inntekter_agg)}")
 
