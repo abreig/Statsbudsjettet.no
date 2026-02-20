@@ -1,13 +1,15 @@
 import type { NextConfig } from "next";
 
-const basePath = "/statsbudsjettet";
+// basePath settes via miljøvariabel for GitHub Pages deploy.
+// Lokalt og på Codespaces er den tom (rot).
+const basePath = process.env.BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {
   // Statisk eksport for GitHub Pages
   output: "export",
 
-  // Base path for GitHub Pages (repo-navn)
-  basePath,
+  // Base path (tom lokalt, "/statsbudsjettet" på GitHub Pages)
+  ...(basePath ? { basePath } : {}),
 
   // Gjør basePath tilgjengelig i klient-kode via process.env
   env: {

@@ -1,6 +1,5 @@
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
-import { visionTool } from "@sanity/vision";
 import budsjettaar from "./schemas/budsjettaar";
 import modul from "./schemas/modul";
 import tema from "./schemas/tema";
@@ -15,7 +14,7 @@ export default defineConfig({
   projectId: process.env.SANITY_STUDIO_PROJECT_ID || "your-project-id",
   dataset: process.env.SANITY_STUDIO_DATASET || "production",
 
-  plugins: [structureTool(), visionTool()],
+  plugins: [structureTool()],
 
   schema: {
     types: [budsjettaar, modul, tema, nokkeltall, sitat],

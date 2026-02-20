@@ -31,6 +31,8 @@ jobs:
 
       - name: Bygg statisk eksport
         run: npm run build
+        env:
+          BASE_PATH: /statsbudsjettet
 
       - name: Konfigurer Pages
         uses: actions/configure-pages@v4
