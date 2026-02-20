@@ -1,0 +1,50 @@
+// Dev Container for statsbudsjettet.no
+// Node 20 + PostgreSQL 16 + Python 3 — alt klart på sekunder i Codespaces.
+{
+  "name": "Statsbudsjettet.no",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+
+  "features": {
+    // PostgreSQL 16 som lokal tjeneste
+    "ghcr.io/robbert229/devcontainer-features/postgresql:1": {
+      "version": "16"
+    },
+    // Python for datapipelinen
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    }
+  },
+
+  // Porter som videresendes automatisk
+  "forwardPorts": [3000, 5432, 5555],
+  "portsAttributes": {
+    "3000": { "label": "Next.js", "onAutoForward": "openBrowser" },
+    "5432": { "label": "PostgreSQL", "onAutoForward": "ignore" },
+    "5555": { "label": "Prisma Studio", "onAutoForward": "openBrowser" }
+  },
+
+  // Kjøres én gang etter containeren er opprettet.
+  // Installer, opprett database, generer Prisma-klient, migrer, seed — alt automatisk.
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+
+  // VS Code / Codespaces-innstillinger
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+        "typescript.preferences.importModuleSpecifier": "non-relative",
+        "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+        "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" }
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "Prisma.prisma",
+        "bradlc.vscode-tailwindcss",
+        "ms-python.python"
+      ]
+    }
+  }
+}
