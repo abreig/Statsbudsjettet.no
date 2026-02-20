@@ -52,3 +52,9 @@ __pycache__/
 .venv/
 venv/
 pipeline/.venv/
+
+# Prisma generert klient
+src/generated/
+
+# Medieupploads
+public/uploads/

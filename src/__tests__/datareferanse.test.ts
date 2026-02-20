@@ -32,6 +32,9 @@ const mockData: BudgetYear = {
     finansposter_til_fond: 82100000000,
     overfoering_fra_fond: 413647646000,
     netto_overfoering: 311221454000,
+    fondsuttak: 413647646000,
+    netto_kontantstrom: 0,
+    kontantstrom_kilder: [],
   },
   metadata: {
     kilde: "Gul bok 2025",
