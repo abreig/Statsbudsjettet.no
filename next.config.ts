@@ -4,9 +4,13 @@ import type { NextConfig } from "next";
 // Lokalt og på Codespaces er den tom (rot).
 const basePath = process.env.BASE_PATH ?? "";
 
+// Statisk eksport kun når STATIC_EXPORT=true (for GitHub Pages).
+// Standard: dynamisk modus for admin-panel, API-ruter og Draft Mode.
+const isStaticExport = process.env.STATIC_EXPORT === "true";
+
 const nextConfig: NextConfig = {
-  // Statisk eksport for GitHub Pages
-  output: "export",
+  // Statisk eksport kun for GitHub Pages-deploy
+  ...(isStaticExport ? { output: "export" } : {}),
 
   // Base path (tom lokalt, "/statsbudsjettet" på GitHub Pages)
   ...(basePath ? { basePath } : {}),
@@ -25,6 +29,9 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+
+  // Server-eksternalisering for Prisma i produksjon
+  serverExternalPackages: ["@prisma/client"],
 };
 
 export default nextConfig;

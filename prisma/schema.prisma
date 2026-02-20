@@ -1,0 +1,188 @@
+// Prisma-skjema for statsbudsjettet.no CMS
+// Basert på databasemodellen i CMS_oppdatert.md seksjon 4
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Brukere og autentisering
+// ---------------------------------------------------------------------------
+
+model Bruker {
+  id       Int     @id @default(autoincrement())
+  epost    String  @unique
+  navn     String
+  entraId  String? @unique @map("entra_id")
+  rolle    String  @default("redaktor") // administrator | redaktor | godkjenner | leser
+  aktiv    Boolean @default(true)
+
+  // Relasjoner
+  opprettedeBudsjettaar Budsjettaar[]          @relation("OpprettetAv")
+  programomraadeEndret  ProgramomraadeInnhold[] @relation("SistEndretAv")
+  opplastetMedia        Media[]                 @relation("LastetOppAv")
+  revisjoner            Revisjon[]              @relation("EndretAv")
+
+  @@map("brukere")
+}
+
+// ---------------------------------------------------------------------------
+// Budsjettår (toppnivå)
+// ---------------------------------------------------------------------------
+
+model Budsjettaar {
+  id              Int       @id @default(autoincrement())
+  aarstall        Int       @unique
+  status          String    @default("kladd") // kladd | til_godkjenning | godkjent | publisert
+  publiseringTid  DateTime? @map("publisering_tid")
+  opprettetAvId   Int?      @map("opprettet_av")
+  opprettetTid    DateTime  @default(now()) @map("opprettet_tid")
+  sistEndret      DateTime  @default(now()) @updatedAt @map("sist_endret")
+
+  // Relasjoner
+  opprettetAv          Bruker?                @relation("OpprettetAv", fields: [opprettetAvId], references: [id])
+  moduler              Modul[]
+  temaer               Tema[]
+  nokkeltall           Nokkeltall[]
+  programomraadeInnhold ProgramomraadeInnhold[]
+  media                Media[]
+
+  @@map("budsjettaar")
+}
+
+// ---------------------------------------------------------------------------
+// Moduler (landingssidesammensetning)
+// ---------------------------------------------------------------------------
+
+model Modul {
+  id             Int    @id @default(autoincrement())
+  budsjettaarId  Int    @map("budsjettaar_id")
+  type           String // hero | plan_for_norge | budsjettgrafer | nokkeltall | egendefinert_tekst
+  rekkefoelge    Int
+  synlig         Boolean @default(true)
+  konfigurasjon  Json    @default("{}")
+
+  // Relasjoner
+  budsjettaar Budsjettaar @relation(fields: [budsjettaarId], references: [id], onDelete: Cascade)
+
+  @@index([budsjettaarId, rekkefoelge], map: "idx_moduler_aar")
+  @@map("moduler")
+}
+
+// ---------------------------------------------------------------------------
+// Temaer (Plan for Norge)
+// ---------------------------------------------------------------------------
+
+model Tema {
+  id                 Int     @id @default(autoincrement())
+  budsjettaarId      Int     @map("budsjettaar_id")
+  rekkefoelge        Int
+  tittel             String
+  ingress            String?
+  farge              String?
+  ikonUrl            String? @map("ikon_url")
+  problembeskrivelse Json?   // TipTap JSON
+  analysegraf        Json?   // {type, data: [{etikett, verdi}]}
+  prioriteringer     Json?   // [{tittel, beskrivelse (TipTap JSON)}]
+  sitatTekst         String? @map("sitat_tekst")
+  sitatPerson        String? @map("sitat_person")
+  sitatTittel        String? @map("sitat_tittel")
+  sitatBildeUrl      String? @map("sitat_bilde_url")
+  budsjettlenker     Json?   // [{omr_nr, visningsnavn, datareferanse}]
+
+  // Relasjoner
+  budsjettaar Budsjettaar @relation(fields: [budsjettaarId], references: [id], onDelete: Cascade)
+
+  @@index([budsjettaarId, rekkefoelge], map: "idx_temaer_aar")
+  @@map("temaer")
+}
+
+// ---------------------------------------------------------------------------
+// Nøkkeltall
+// ---------------------------------------------------------------------------
+
+model Nokkeltall {
+  id                Int    @id @default(autoincrement())
+  budsjettaarId     Int    @map("budsjettaar_id")
+  etikett           String
+  verdi             String
+  enhet             String?
+  endringsindikator String? // opp | ned | noytral
+  datareferanse     String?
+
+  // Relasjoner
+  budsjettaar Budsjettaar @relation(fields: [budsjettaarId], references: [id], onDelete: Cascade)
+
+  @@map("nokkeltall")
+}
+
+// ---------------------------------------------------------------------------
+// Programområde-innhold (redaksjonelt lag for drill-down-sider)
+// ---------------------------------------------------------------------------
+
+model ProgramomraadeInnhold {
+  id             Int      @id @default(autoincrement())
+  budsjettaarId  Int      @map("budsjettaar_id")
+  omrNr          Int      @map("omr_nr")
+  ingress        String?
+  brodtekst      Json?    @map("brodtekst") // TipTap JSON
+  grafer         Json?    // [{type, tittel, datareferanse, manuell_data}]
+  nokkeltallIds  Int[]    @map("nokkeltall_ids")
+  sistEndretAvId Int?     @map("sist_endret_av")
+  sistEndret     DateTime @default(now()) @updatedAt @map("sist_endret")
+
+  // Relasjoner
+  budsjettaar  Budsjettaar @relation(fields: [budsjettaarId], references: [id], onDelete: Cascade)
+  sistEndretAv Bruker?     @relation("SistEndretAv", fields: [sistEndretAvId], references: [id])
+
+  @@unique([budsjettaarId, omrNr])
+  @@index([budsjettaarId, omrNr], map: "idx_programomr_aar_nr")
+  @@map("programomraade_innhold")
+}
+
+// ---------------------------------------------------------------------------
+// Mediebibliotek
+// ---------------------------------------------------------------------------
+
+model Media {
+  id             Int       @id @default(autoincrement())
+  budsjettaarId  Int?      @map("budsjettaar_id")
+  filnavn        String
+  lagringsbane   String
+  mimeType       String    @map("mime_type")
+  stoerrelseBytes Int?     @map("storrelse_bytes")
+  altTekst       String?   @map("alt_tekst")
+  lastetOppAvId  Int?      @map("lastet_opp_av")
+  lastetOppTid   DateTime  @default(now()) @map("lastet_opp_tid")
+
+  // Relasjoner
+  budsjettaar Budsjettaar? @relation(fields: [budsjettaarId], references: [id])
+  lastetOppAv Bruker?      @relation("LastetOppAv", fields: [lastetOppAvId], references: [id])
+
+  @@map("media")
+}
+
+// ---------------------------------------------------------------------------
+// Revisjonslogg (append-only)
+// ---------------------------------------------------------------------------
+
+model Revisjon {
+  id           Int      @id @default(autoincrement())
+  tabell       String
+  radId        Int      @map("rad_id")
+  handling     String   // opprett | endre | slett | statusendring
+  snapshotJson Json     @map("snapshot_json")
+  endretAvId   Int?     @map("endret_av")
+  endretTid    DateTime @default(now()) @map("endret_tid")
+
+  // Relasjoner
+  endretAv Bruker? @relation("EndretAv", fields: [endretAvId], references: [id])
+
+  @@index([tabell, radId], map: "idx_revisjoner")
+  @@map("revisjoner")
+}
