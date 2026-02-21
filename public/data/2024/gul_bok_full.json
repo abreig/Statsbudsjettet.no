@@ -1,6 +1,6 @@
 {
   "budsjettaar": 2024,
-  "publisert": "2026-02-20",
+  "publisert": "2026-02-21",
   "valuta": "NOK",
   "utgifter": {
     "total": 2938608883000,
@@ -22616,7 +22616,12 @@
         "navn": "Equinor-utbytte",
         "belop": 38265400000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": 395963515000
+  },
+  "oljekorrigert": {
+    "utgifter_total": 2106443383000,
+    "inntekter_total": 1652041498000
   },
   "metadata": {
     "kilde": "Gul bok 2024",

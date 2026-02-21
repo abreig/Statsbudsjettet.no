@@ -55,12 +55,22 @@ fi
 echo ""
 echo "→ Genererer .env ..."
 NEXTAUTH_SECRET=$(openssl rand -base64 32)
+
+# Bestem NEXTAUTH_URL basert på om vi kjører i GitHub Codespaces
+if [ -n "${CODESPACE_NAME:-}" ]; then
+  FORWARDING_DOMAIN="${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-app.github.dev}"
+  NEXTAUTH_URL_VALUE="https://${CODESPACE_NAME}-3000.${FORWARDING_DOMAIN}"
+  echo "  Codespaces oppdaget — bruker ${NEXTAUTH_URL_VALUE}"
+else
+  NEXTAUTH_URL_VALUE="http://localhost:3000"
+fi
+
 cat > .env <<EOF
 # --- Generert av .devcontainer/setup.sh ---
 DATABASE_URL="postgresql://postgres:postgres@db:5432/statsbudsjettet?schema=public"
 
 NEXTAUTH_SECRET="${NEXTAUTH_SECRET}"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="${NEXTAUTH_URL_VALUE}"
 
 # Azure Entra ID — ikke nødvendig i utvikling.
 # AZURE_AD_CLIENT_ID=""
@@ -113,7 +123,7 @@ echo ""
 echo "  Start utviklingsserveren:"
 echo "    npm run dev"
 echo ""
-echo "  Nettside:    http://localhost:3000"
-echo "  Admin-panel: http://localhost:3000/admin"
+echo "  Nettside:    ${NEXTAUTH_URL_VALUE}"
+echo "  Admin-panel: ${NEXTAUTH_URL_VALUE}/admin"
 echo "    → Logg inn med admin@dev.local"
 echo "============================================"

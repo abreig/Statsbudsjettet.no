@@ -1,12 +1,12 @@
 {
-  "budsjettaar": 2025,
-  "total_utgifter": 1991237008000,
-  "total_inntekter": 1991237008000,
+  "budsjettaar": 2026,
+  "total_utgifter": 2164460965000,
+  "total_inntekter": 2164460965000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",
       "navn": "Folketrygden",
-      "belop": 701915317000,
+      "belop": 744017715000,
       "omr_gruppe": [
         28,
         29,
@@ -18,7 +18,7 @@
     {
       "id": "ovrige_utgifter",
       "navn": "Øvrige utgifter",
-      "belop": 448790668000,
+      "belop": 470248015000,
       "omr_gruppe": [
         0,
         1,
@@ -41,42 +41,42 @@
     {
       "id": "kommuner",
       "navn": "Kommuner og distrikter",
-      "belop": 263124267000,
+      "belop": 283721902000,
       "omr_nr": 13,
       "farge": "#263080"
     },
     {
       "id": "helse",
       "navn": "Helse og omsorg",
-      "belop": 248109015000,
+      "belop": 257365624000,
       "omr_nr": 10,
       "farge": "#354A9E"
     },
     {
       "id": "forsvar",
       "navn": "Forsvar",
-      "belop": 110045346000,
+      "belop": 179765304000,
       "omr_nr": 4,
       "farge": "#4A65B5"
     },
     {
       "id": "kunnskap",
       "navn": "Kunnskapsformål",
-      "belop": 101502224000,
+      "belop": 107226016000,
       "omr_nr": 7,
       "farge": "#6580C5"
     },
     {
       "id": "transport",
       "navn": "Innenlands transport",
-      "belop": 94178400000,
+      "belop": 96105900000,
       "omr_nr": 21,
       "farge": "#839DD5"
     },
     {
       "id": "naering",
       "navn": "Næring og fiskeri",
-      "belop": 23571771000,
+      "belop": 26010489000,
       "omr_nr": 17,
       "farge": "#A8BAE2"
     }
@@ -85,21 +85,28 @@
     {
       "id": "skatt_person",
       "navn": "Skatt på inntekt og formue",
-      "belop": 430063300000,
+      "belop": 507780250000,
       "omr_nr": 25,
       "farge": "#004D52"
     },
     {
       "id": "mva",
       "navn": "Merverdiavgift",
-      "belop": 409258000000,
+      "belop": 420970000000,
       "omr_nr": 25,
       "farge": "#006B73"
     },
     {
+      "id": "arbeidsgiveravgift",
+      "navn": "Arbeidsgiveravgift",
+      "belop": 283011000000,
+      "omr_nr": 25,
+      "farge": "#008286"
+    },
+    {
       "id": "ovrige_inntekter",
       "navn": "Øvrige inntekter",
-      "belop": 271533562000,
+      "belop": 269289869000,
       "omr_gruppe": [
         0,
         1,
@@ -124,52 +131,40 @@
         29,
         33
       ],
-      "farge": "#008286"
-    },
-    {
-      "id": "arbeidsgiveravgift",
-      "navn": "Arbeidsgiveravgift",
-      "belop": 269420000000,
-      "omr_nr": 25,
       "farge": "#2A9D8F"
     },
     {
       "id": "trygdeavgift",
       "navn": "Trygdeavgift",
-      "belop": 197314500000,
+      "belop": 231189440000,
       "omr_nr": 25,
       "farge": "#5AB8AD"
     }
   ],
   "spu": {
-    "overfoering_til_fond": 642769100000,
-    "finansposter_til_fond": 82100000000,
-    "overfoering_fra_fond": 413647646000,
-    "netto_overfoering": 311221454000,
-    "fondsuttak": 413647646000,
-    "netto_kontantstrom": 724869100000,
+    "overfoering_til_fond": 521305600000,
+    "finansposter_til_fond": 0,
+    "overfoering_fra_fond": 452220406000,
+    "netto_overfoering": 69085194000,
+    "fondsuttak": 452220406000,
+    "netto_kontantstrom": 557405600000,
     "kontantstrom_kilder": [
       {
         "id": "petskatt",
         "navn": "Petroleumsskatter",
-        "belop": 388501000000
+        "belop": 302501000000
       },
       {
         "id": "sdfi",
         "navn": "SDFI",
-        "belop": 256100000000
+        "belop": 229100000000
       },
       {
         "id": "equinor",
         "navn": "Equinor-utbytte",
-        "belop": 27768100000
-      },
-      {
-        "id": "andre_petro",
-        "navn": "Andre petroleumsinnt.",
-        "belop": 52500000000
+        "belop": 25804600000
       }
     ],
-    "netto_overfoering_til_spu": 311221454000
+    "netto_overfoering_til_spu": 105185194000
   }
 }

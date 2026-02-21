@@ -1,6 +1,6 @@
 {
   "budsjettaar": 2022,
-  "publisert": "2026-02-20",
+  "publisert": "2026-02-21",
   "valuta": "NOK",
   "utgifter": {
     "total": 2062493768000,
@@ -22351,7 +22351,12 @@
         "navn": "Andre petroleumsinnt.",
         "belop": 49801000000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": 2764768000
+  },
+  "oljekorrigert": {
+    "utgifter_total": 1715392768000,
+    "inntekter_total": 1371056536000
   },
   "metadata": {
     "kilde": "Gul bok 2022",

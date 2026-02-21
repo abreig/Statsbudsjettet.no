@@ -1,24 +1,28 @@
 {
   "budsjettaar": 2025,
-  "publisert": "2026-02-20",
+  "publisert": "2026-02-21",
   "kilde": "Gul bok 2025",
   "saldert_budsjett_forrige": "2024",
   "totaler": {
     "utgifter": 2970883012000,
     "inntekter": 2796781829000
   },
+  "oljekorrigert_totaler": {
+    "utgifter": 1991237008000,
+    "inntekter": 1577589362000
+  },
   "spu": {
     "overfoering_til_fond": 642769100000,
     "finansposter_til_fond": 82100000000,
     "overfoering_fra_fond": 413647646000,
     "netto_overfoering": 311221454000,
-    "fondsuttak": 527247829000,
+    "fondsuttak": 413647646000,
     "netto_kontantstrom": 724869100000,
     "kontantstrom_kilder": [
       {
         "id": "petskatt",
         "navn": "Petroleumsskatter",
-        "belop": 380500000000
+        "belop": 388501000000
       },
       {
         "id": "sdfi",
@@ -33,9 +37,10 @@
       {
         "id": "andre_petro",
         "navn": "Andre petroleumsinnt.",
-        "belop": 60501000000
+        "belop": 52500000000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": 311221454000
   },
   "antall_poster": {
     "utgifter": null,
