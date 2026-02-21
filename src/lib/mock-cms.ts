@@ -111,9 +111,15 @@ const MOCK_2026: CMSBudsjettaar = {
       konfigurasjon: {},
     },
     {
-      type: "budsjettgrafer",
+      type: "nasjonalbudsjettet",
       synlig: true,
       rekkefolge: 2,
+      konfigurasjon: {},
+    },
+    {
+      type: "budsjettgrafer",
+      synlig: true,
+      rekkefolge: 3,
       konfigurasjon: {
         overskrift: "Budsjettet i tall",
         forklaringstekst:
@@ -122,12 +128,6 @@ const MOCK_2026: CMSBudsjettaar = {
           "Overføringen fra oljefondet (Statens pensjonsfond utland) dekker det oljekorrigerte underskuddet.",
         visEndringDefault: false,
       },
-    },
-    {
-      type: "nasjonalbudsjettet",
-      synlig: true,
-      rekkefolge: 3,
-      konfigurasjon: {},
     },
     {
       type: "nokkeltall",
@@ -278,9 +278,15 @@ const MOCK_2025: CMSBudsjettaar = {
       konfigurasjon: {},
     },
     {
-      type: "budsjettgrafer",
+      type: "nasjonalbudsjettet",
       synlig: true,
       rekkefolge: 2,
+      konfigurasjon: {},
+    },
+    {
+      type: "budsjettgrafer",
+      synlig: true,
+      rekkefolge: 3,
       konfigurasjon: {
         overskrift: "Budsjettet i tall",
         forklaringstekst:
@@ -289,12 +295,6 @@ const MOCK_2025: CMSBudsjettaar = {
           "Overføringen fra oljefondet (Statens pensjonsfond utland) dekker det oljekorrigerte underskuddet.",
         visEndringDefault: false,
       },
-    },
-    {
-      type: "nasjonalbudsjettet",
-      synlig: true,
-      rekkefolge: 3,
-      konfigurasjon: {},
     },
     {
       type: "nokkeltall",

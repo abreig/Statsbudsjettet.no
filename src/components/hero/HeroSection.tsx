@@ -20,6 +20,22 @@ interface HeroSectionProps {
   budsjettdata?: BudgetYear | null;
 }
 
+/** Returnerer endringsprosent for en nøkkeltall-rad basert på datareferansen. */
+function finnEndringsprosent(
+  datareferanse: string | undefined,
+  budsjettdata: BudgetYear | null | undefined
+): number | null {
+  if (!datareferanse || !budsjettdata) return null;
+
+  if (datareferanse.includes("utgifter")) {
+    return budsjettdata.utgifter.endring_fra_saldert?.endring_prosent ?? null;
+  }
+  if (datareferanse.includes("inntekter")) {
+    return budsjettdata.inntekter.endring_fra_saldert?.endring_prosent ?? null;
+  }
+  return null;
+}
+
 export default function HeroSection({
   aar,
   tittel,
@@ -27,6 +43,8 @@ export default function HeroSection({
   nokkeltall,
   budsjettdata,
 }: HeroSectionProps) {
+  const saldertAar = budsjettdata?.metadata?.saldert_budsjett_forrige ?? null;
+
   return (
     <section className={styles.hero} id="hero">
       {undertittel && <p className={styles.undertittel}>{undertittel}</p>}
@@ -39,6 +57,13 @@ export default function HeroSection({
           if (tall.datareferanse && budsjettdata) {
             numeriskVerdi = opplosDatareferanse(tall.datareferanse, budsjettdata);
           }
+
+          const endringsprosent = finnEndringsprosent(tall.datareferanse, budsjettdata);
+          const fortegn = endringsprosent != null && endringsprosent > 0 ? "+" : "";
+          const endringtekst =
+            endringsprosent != null
+              ? `${fortegn}${endringsprosent.toFixed(1).replace(".", ",")} %`
+              : null;
 
           return (
             <div key={tall.etikett} className={styles.nokkeltallItem} role="listitem">
@@ -56,6 +81,14 @@ export default function HeroSection({
                   tall.verdi ?? "—"
                 )}
               </div>
+              {endringtekst && saldertAar && (
+                <div
+                  className={styles.endringsmerke}
+                  aria-label={`Endring fra saldert budsjett ${saldertAar}: ${endringtekst}`}
+                >
+                  {endringtekst} fra saldert {saldertAar}
+                </div>
+              )}
               <div className={styles.nokkeltallEtikett}>{tall.etikett}</div>
             </div>
           );

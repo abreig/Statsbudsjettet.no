@@ -41,6 +41,15 @@
   line-height: var(--linjehoyde-tett);
 }
 
+.endringsmerke {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-xs);
+  color: var(--tekst-sekundaer);
+  opacity: 0.75;
+  margin-top: var(--space-1);
+  letter-spacing: 0.01em;
+}
+
 .nokkeltallEtikett {
   font-family: var(--font-sans);
   font-size: var(--tekst-sm);
