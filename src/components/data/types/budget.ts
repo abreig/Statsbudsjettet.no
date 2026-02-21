@@ -131,6 +131,8 @@ export interface AggregertKategori {
 
 export interface AggregertBudsjett {
   budsjettaar: number;
+  total_utgifter: number;
+  total_inntekter: number;
   utgifter_aggregert: AggregertKategori[];
   inntekter_aggregert: AggregertKategori[];
   spu: SPUData;

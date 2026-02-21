@@ -13,6 +13,8 @@ interface StackedBarChartProps {
   onSegmentClick: (side: "utgift" | "inntekt", id: string) => void;
   onKontantstromClick: () => void;
   aar: number;
+  totalUtgifter?: number;
+  totalInntekter?: number;
 }
 
 // Layout-konstanter
@@ -22,11 +24,21 @@ const BAR_GAP = 80;
 const BAR_TOP = 76;
 const BAR_BOTTOM = BAR_TOP + BAR_H;
 
-const UTGIFT_X = 50;
-const INNTEKT_X = UTGIFT_X + BAR_W + BAR_GAP;
-const SPU_ZONE_X = INNTEKT_X + BAR_W + 65;
+// SPU-boks dimensjoner
+const SPU_BOX_W = 150;
+const SPU_BOX_H = 56;
+const KS_BOX_W = 164;
+const KS_BOX_H = 48;
+const SPU_GAP = 60; // avstand mellom inntektsbar og SPU-sone
 
-const SVG_W = 1080;
+// Beregn sentrert layout
+const CONTENT_W = BAR_W * 2 + BAR_GAP + SPU_GAP + Math.max(SPU_BOX_W, KS_BOX_W);
+const SVG_W = CONTENT_W + 80; // 40px padding på hver side
+const LEFT_PAD = Math.round((SVG_W - CONTENT_W) / 2);
+
+const UTGIFT_X = LEFT_PAD;
+const INNTEKT_X = UTGIFT_X + BAR_W + BAR_GAP;
+const SPU_ZONE_X = INNTEKT_X + BAR_W + SPU_GAP;
 
 // SPU-farger
 const SPU_BLA = "#2C4F8A";
@@ -112,6 +124,8 @@ export default function StackedBarChart({
   spu,
   onSegmentClick,
   onKontantstromClick,
+  totalUtgifter,
+  totalInntekter,
 }: StackedBarChartProps) {
   const [tt, setTt] = useState<TooltipInfo | null>(null);
   const [hovGroup, setHovGroup] = useState<string | null>(null);
@@ -134,16 +148,25 @@ export default function StackedBarChart({
     return () => observer.disconnect();
   }, []);
 
-  const utgTotal = useMemo(() => utgifter.reduce((s, k) => s + k.belop, 0), [utgifter]);
-  const ordTotal = useMemo(() => inntekter.reduce((s, k) => s + k.belop, 0), [inntekter]);
+  // Bruk eksplisitte totaler fra data, eller beregn fra kategorier som fallback
+  const utgKatSum = useMemo(() => utgifter.reduce((s, k) => s + k.belop, 0), [utgifter]);
+  const innKatSum = useMemo(() => inntekter.reduce((s, k) => s + k.belop, 0), [inntekter]);
+  const utgTotal = totalUtgifter ?? utgKatSum;
+  const innTotal = totalInntekter ?? (innKatSum + spu.fondsuttak);
   const fondsuttak = spu.fondsuttak;
 
+  // Skala basert på utgifter (høyeste søylen)
   const scale = BAR_H / utgTotal;
-  const ordH = ordTotal * scale;
-  const fondH = fondsuttak * scale;
-  const ordTopY = BAR_BOTTOM - ordH;
-  const fondSegY = ordTopY - fondH;
 
+  // Inntekter: ordinære + fondsuttak
+  const ordH = innKatSum * scale;
+  const fondH = fondsuttak * scale;
+  const innTotalH = ordH + fondH;
+  const innTopY = BAR_BOTTOM - innTotalH;
+  const ordTopY = BAR_BOTTOM - ordH;
+  const fondSegY = innTopY; // fondsuttak er øverst
+
+  // Utgiftssegmenter — fyller hele baren
   const uSegs: SegmentData[] = useMemo(() => {
     const sorted = [...utgifter].sort((a, b) => b.belop - a.belop);
     let y = BAR_BOTTOM;
@@ -154,6 +177,7 @@ export default function StackedBarChart({
     });
   }, [utgifter, scale]);
 
+  // Inntektssegmenter — fyller den ordinære delen (under fondsuttak)
   const iSegs: SegmentData[] = useMemo(() => {
     const sorted = [...inntekter].sort((a, b) => b.belop - a.belop);
     let y = BAR_BOTTOM;
@@ -164,18 +188,28 @@ export default function StackedBarChart({
     });
   }, [inntekter, scale]);
 
-  // SPU-bokser
-  const spuW = 150;
-  const spuH = 56;
-  const spuX = SPU_ZONE_X + 10;
-  const spuCx = spuX + spuW / 2;
-  const spuY = fondSegY + fondH / 2 - spuH / 2 + 30;
-  const ksW = 164;
-  const ksH = 48;
-  const ksX = spuCx - ksW / 2;
+  // SPU-bokser — plasser sentrert på fondsuttak-segmentet
+  const spuCx = SPU_ZONE_X + Math.max(SPU_BOX_W, KS_BOX_W) / 2;
+  const spuX = spuCx - SPU_BOX_W / 2;
+  const spuY = fondSegY + fondH / 2 - SPU_BOX_H / 2 + 30;
+  const ksX = spuCx - KS_BOX_W / 2;
   const ksY = spuY - 90;
 
-  const broPath = `M${spuX},${spuY + spuH / 2} C${spuX - 45},${spuY + spuH / 2} ${INNTEKT_X + BAR_W + 45},${fondSegY + fondH / 2} ${INNTEKT_X + BAR_W},${fondSegY + fondH / 2}`;
+  // SPU-flow: fylt bane fra SPU-boks til hele fondsuttak-segmentet
+  const flowBarRight = INNTEKT_X + BAR_W;
+  const flowSpuLeft = spuX;
+  const flowMidX = (flowBarRight + flowSpuLeft) / 2;
+  const flowPath = [
+    `M${flowBarRight},${fondSegY}`,             // top-venstre (bar-kant, topp av fondsuttak)
+    `C${flowMidX},${fondSegY}`,                 // kontrollpunkt
+    ` ${flowMidX},${spuY}`,
+    ` ${flowSpuLeft},${spuY}`,                  // top-høyre (SPU-boks topp)
+    `L${flowSpuLeft},${spuY + SPU_BOX_H}`,     // bunn-høyre (SPU-boks bunn)
+    `C${flowMidX},${spuY + SPU_BOX_H}`,        // kontrollpunkt
+    ` ${flowMidX},${fondSegY + fondH}`,
+    ` ${flowBarRight},${fondSegY + fondH}`,     // bunn-venstre (bar-kant, bunn av fondsuttak)
+    "Z",
+  ].join(" ");
 
   const show = useCallback(
     (e: React.MouseEvent, id: string, group: string, title: string, value: string, desc?: string, accent?: string) => {
@@ -205,15 +239,15 @@ export default function StackedBarChart({
           width={SVG_W} height={H} viewBox={`0 0 ${SVG_W} ${H}`}
           style={{ display: "block", margin: "0 auto", maxWidth: "100%", overflow: "visible" }}
           role="img"
-          aria-label={`Budsjettvisualisering: utgifter ${formaterBelop(utgTotal)}, inntekter ${formaterBelop(ordTotal + fondsuttak)}`}
+          aria-label={`Budsjettvisualisering: utgifter ${formaterBelop(utgTotal)}, inntekter ${formaterBelop(innTotal)}`}
         >
           <defs>
             <pattern id="spu-stripe" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
               <rect width="7" height="7" fill={FOND_GUL} />
               <line x1="0" y1="0" x2="0" y2="7" stroke={FOND_GUL_LIGHT} strokeWidth="3" strokeOpacity="0.5" />
             </pattern>
-            <linearGradient id="bro-grad" x1="1" y1="0" x2="0" y2="0">
-              <stop offset="0%" stopColor={FOND_GUL} stopOpacity="0.5" />
+            <linearGradient id="flow-grad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor={FOND_GUL} stopOpacity="0.35" />
               <stop offset="100%" stopColor={SPU_BLA} stopOpacity="0.15" />
             </linearGradient>
             <linearGradient id="arrow-grad" x1="0" y1="0" x2="0" y2="1">
@@ -242,11 +276,12 @@ export default function StackedBarChart({
             </g>
           ))}
 
-          {/* INNTEKTER (ordinære) */}
+          {/* INNTEKTER */}
           <text x={INNTEKT_X + BAR_W / 2} y={28} textAnchor="middle" fontSize={11} fontWeight={600} fill="#888" letterSpacing="0.12em">INNTEKTER</text>
-          <text x={INNTEKT_X + BAR_W / 2} y={52} textAnchor="middle" fontFamily="Georgia, serif" fontSize={22} fontWeight={700} fill="#0C1045">{formaterMrd(ordTotal)}</text>
-          <text x={INNTEKT_X + BAR_W / 2} y={68} textAnchor="middle" fontSize={10} fill="#aaa">mrd. kr (totalt)</text>
+          <text x={INNTEKT_X + BAR_W / 2} y={52} textAnchor="middle" fontFamily="Georgia, serif" fontSize={22} fontWeight={700} fill="#0C1045">{formaterMrd(innTotal)}</text>
+          <text x={INNTEKT_X + BAR_W / 2} y={68} textAnchor="middle" fontSize={10} fill="#aaa">mrd. kr</text>
 
+          {/* Ordinære inntektssegmenter */}
           {iSegs.map((s) => (
             <g key={s.id} tabIndex={0} role="button" aria-label={`${s.navn}: ${formaterBelop(s.belop)}`}
               onClick={() => onSegmentClick("inntekt", s.id)}
@@ -254,7 +289,7 @@ export default function StackedBarChart({
               style={{ cursor: "pointer", opacity: erAnimert ? (dim("inntekt", s.id) ? 0.15 : 1) : 0, transition: "opacity 0.3s ease" }}
             >
               <rect x={s.rx} y={s.ry} width={s.rw} height={s.rh} fill={s.farge} rx={1}
-                onMouseEnter={(e) => show(e, s.id, "inntekt", s.navn, `${formaterMrd(s.belop)} mrd. kr`, `${((s.belop / ordTotal) * 100).toFixed(1)} % av ordinære inntekter`, s.farge)}
+                onMouseEnter={(e) => show(e, s.id, "inntekt", s.navn, `${formaterMrd(s.belop)} mrd. kr`, `${((s.belop / innKatSum) * 100).toFixed(1)} % av ordinære inntekter`, s.farge)}
                 onMouseMove={move} onMouseLeave={hide} />
               {s.ry > ordTopY + 2 && <line x1={s.rx} y1={s.ry} x2={s.rx + s.rw} y2={s.ry} stroke="#fff" strokeWidth={1} pointerEvents="none" />}
               {s.rh > 28 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? -3 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 12 : 10} fontWeight={500} fill={tekstFarge(s.farge)} pointerEvents="none" opacity={0.95}>{s.rh > 50 ? s.navn : ""}</text>}
@@ -262,10 +297,7 @@ export default function StackedBarChart({
             </g>
           ))}
 
-          {/* Skillelinje ordinære / fondsuttak */}
-          <line x1={INNTEKT_X} y1={ordTopY} x2={INNTEKT_X + BAR_W} y2={ordTopY} stroke={SPU_BLA} strokeWidth={1} strokeDasharray="4,3" opacity={0.3} />
-
-          {/* Fondsuttak-segment */}
+          {/* Fondsuttak-segment (gul, øverst på inntektssøylen) */}
           <g style={{ cursor: "pointer", opacity: erAnimert ? (dim("inntekt", "fondsuttak") ? 0.15 : 1) : 0, transition: "opacity 0.3s ease" }}>
             <rect x={INNTEKT_X} y={fondSegY} width={BAR_W} height={fondH} fill="url(#spu-stripe)" rx={1}
               onMouseEnter={(e) => show(e, "fondsuttak", "inntekt", "Uttak fra SPU", `${formaterMrd(fondsuttak)} mrd. kr`, "= det oljekorrigerte underskuddet. Styrt av handlingsregelen.", FOND_GUL)}
@@ -278,40 +310,50 @@ export default function StackedBarChart({
             )}
           </g>
 
+          {/* Skillelinje ordinære / fondsuttak */}
+          <line x1={INNTEKT_X} y1={ordTopY} x2={INNTEKT_X + BAR_W} y2={ordTopY} stroke={SPU_BLA} strokeWidth={1} strokeDasharray="4,3" opacity={0.3} />
+
           {/* Alignment-linjer */}
           <line x1={UTGIFT_X} y1={BAR_TOP} x2={INNTEKT_X + BAR_W} y2={BAR_TOP} stroke="#e0ddd6" strokeWidth={0.5} />
           <line x1={UTGIFT_X} y1={BAR_BOTTOM} x2={INNTEKT_X + BAR_W} y2={BAR_BOTTOM} stroke="#e0ddd6" strokeWidth={0.5} />
+
+          {/* SPU-FLOW: fylt bane fra SPU-boks til fondsuttak-segment */}
+          <path
+            d={flowPath}
+            fill="url(#flow-grad)"
+            stroke={FOND_GUL}
+            strokeWidth={0.5}
+            strokeOpacity={0.3}
+            opacity={erAnimert ? 0.7 : 0}
+            style={{ transition: "opacity 0.5s ease 0.5s" }}
+          />
 
           {/* KONTANTSTRØM-BOKS */}
           <g style={{ cursor: "pointer", opacity: erAnimert ? 1 : 0, transition: "opacity 0.5s ease 0.3s" }}
             onClick={onKontantstromClick} tabIndex={0} role="button"
             aria-label={`Netto kontantstrøm petroleum: ${formaterBelop(spu.netto_kontantstrom)}. Klikk for fordeling.`}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onKontantstromClick(); } }}>
-            <rect x={ksX} y={ksY} width={ksW} height={ksH} rx={8} fill={SPU_BLA} opacity={0.9}
+            <rect x={ksX} y={ksY} width={KS_BOX_W} height={KS_BOX_H} rx={8} fill={SPU_BLA} opacity={0.9}
               onMouseEnter={(e) => show(e, "kontant", "kontant", "Netto kontantstrøm petroleum", `${formaterMrd(spu.netto_kontantstrom)} mrd. kr`, "Klikk for fordeling. Går uavkortet til fondet.", SPU_BLA)}
               onMouseMove={move} onMouseLeave={hide} />
-            <text x={spuCx} y={ksY + ksH / 2 - 8} textAnchor="middle" fontSize={10} fontWeight={500} fill="rgba(255,255,255,0.7)" pointerEvents="none">Netto kontantstrøm petroleum</text>
-            <text x={spuCx} y={ksY + ksH / 2 + 10} textAnchor="middle" fontSize={15} fontWeight={700} fill="#fff" pointerEvents="none">{formaterMrd(spu.netto_kontantstrom)} mrd. kr</text>
+            <text x={spuCx} y={ksY + KS_BOX_H / 2 - 8} textAnchor="middle" fontSize={10} fontWeight={500} fill="rgba(255,255,255,0.7)" pointerEvents="none">Netto kontantstrøm petroleum</text>
+            <text x={spuCx} y={ksY + KS_BOX_H / 2 + 10} textAnchor="middle" fontSize={15} fontWeight={700} fill="#fff" pointerEvents="none">{formaterMrd(spu.netto_kontantstrom)} mrd. kr</text>
             <text x={spuCx} y={ksY - 8} textAnchor="middle" fontSize={8} fill="#bbb" pointerEvents="none">Klikk for fordeling</text>
           </g>
 
           {/* Pil kontantstrøm → SPU */}
-          <line x1={spuCx} y1={ksY + ksH + 4} x2={spuCx} y2={spuY - 4} stroke="url(#arrow-grad)" strokeWidth={3} style={{ opacity: erAnimert ? 1 : 0, transition: "opacity 0.5s ease 0.4s" }} />
+          <line x1={spuCx} y1={ksY + KS_BOX_H + 4} x2={spuCx} y2={spuY - 4} stroke="url(#arrow-grad)" strokeWidth={3} style={{ opacity: erAnimert ? 1 : 0, transition: "opacity 0.5s ease 0.4s" }} />
           <polygon points={`${spuCx},${spuY - 4} ${spuCx - 6},${spuY - 16} ${spuCx + 6},${spuY - 16}`} fill={SPU_BLA} opacity={erAnimert ? 0.4 : 0} style={{ transition: "opacity 0.5s ease 0.4s" }} />
 
           {/* SPU-BOKS */}
           <g style={{ opacity: erAnimert ? 1 : 0, transition: "opacity 0.5s ease 0.3s" }}>
-            <rect x={spuX} y={spuY} width={spuW} height={spuH} rx={8} fill={SPU_BLA} style={{ cursor: "pointer" }}
+            <rect x={spuX} y={spuY} width={SPU_BOX_W} height={SPU_BOX_H} rx={8} fill={SPU_BLA} style={{ cursor: "pointer" }}
               onMouseEnter={(e) => show(e, "spu", "spu", "Statens pensjonsfond utland", "~19 800 mrd. kr", "Handlingsregelen: uttak ~3 % av fondets verdi per år", SPU_BLA)}
               onMouseMove={move} onMouseLeave={hide} />
-            <text x={spuCx} y={spuY + spuH / 2 - 5} textAnchor="middle" fontSize={16} fontWeight={700} fill="#fff" pointerEvents="none">SPU</text>
-            <text x={spuCx} y={spuY + spuH / 2 + 12} textAnchor="middle" fontSize={9} fill="rgba(255,255,255,0.55)" pointerEvents="none">Statens pensjonsfond utland</text>
-            <text x={spuCx} y={spuY + spuH + 16} textAnchor="middle" fontSize={9} fill="#999" fontStyle="italic">Uttak ~3 % av fondets verdi</text>
+            <text x={spuCx} y={spuY + SPU_BOX_H / 2 - 5} textAnchor="middle" fontSize={16} fontWeight={700} fill="#fff" pointerEvents="none">SPU</text>
+            <text x={spuCx} y={spuY + SPU_BOX_H / 2 + 12} textAnchor="middle" fontSize={9} fill="rgba(255,255,255,0.55)" pointerEvents="none">Statens pensjonsfond utland</text>
+            <text x={spuCx} y={spuY + SPU_BOX_H + 16} textAnchor="middle" fontSize={9} fill="#999" fontStyle="italic">Uttak ~3 % av fondets verdi</text>
           </g>
-
-          {/* BRO: SPU → fondsuttak */}
-          <path d={broPath} fill="none" stroke="url(#bro-grad)" strokeWidth={Math.max(8, fondH * 0.4)} strokeLinecap="round" opacity={erAnimert ? 0.4 : 0} style={{ transition: "opacity 0.5s ease 0.5s" }} />
-          <path d={broPath} fill="none" stroke={SPU_BLA} strokeWidth={1} opacity={erAnimert ? 0.15 : 0} strokeDasharray="4,4" style={{ transition: "opacity 0.5s ease 0.5s" }} />
         </svg>
 
         <Tooltip info={tt} containerRef={ref} />
