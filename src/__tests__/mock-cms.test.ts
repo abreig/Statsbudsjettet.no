@@ -17,15 +17,15 @@ describe("hentMockCMSData", () => {
     expect(data?.status).toBe("approved");
   });
 
-  it("har fire moduler", () => {
+  it("har fem moduler", () => {
     const data = hentMockCMSData(2025);
-    expect(data?.moduler).toHaveLength(4);
+    expect(data?.moduler).toHaveLength(5);
   });
 
   it("har moduler i riktig rekkefølge", () => {
     const data = hentMockCMSData(2025);
     const typer = data?.moduler.map((m) => m.type);
-    expect(typer).toEqual(["hero", "plan_for_norge", "budsjettgrafer", "nokkeltall"]);
+    expect(typer).toEqual(["hero", "plan_for_norge", "budsjettgrafer", "nasjonalbudsjettet", "nokkeltall"]);
   });
 
   it("alle moduler er synlige", () => {

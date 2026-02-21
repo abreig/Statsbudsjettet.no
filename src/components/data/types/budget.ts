@@ -182,6 +182,7 @@ export interface PostgruppeFordeling {
 export type ModulType =
   | "hero"
   | "plan_for_norge"
+  | "nasjonalbudsjettet"
   | "budsjettgrafer"
   | "nokkeltall"
   | "egendefinert_tekst";

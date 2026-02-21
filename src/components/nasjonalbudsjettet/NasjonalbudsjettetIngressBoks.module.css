@@ -1,0 +1,152 @@
+.boks {
+  background-color: var(--reg-lysgraa);
+  border-left: 4px solid var(--reg-marine);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-5) var(--space-6);
+  margin: var(--space-4) 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.tittel {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-2xl);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+  margin: 0;
+}
+
+.badge {
+  flex-shrink: 0;
+  font-family: var(--font-sans);
+  font-size: var(--tekst-xs);
+  font-weight: var(--vekt-semibold);
+  color: var(--reg-marine);
+  background-color: var(--bg-hvit);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--reg-marine);
+  letter-spacing: 0.05em;
+}
+
+.ingress {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-base);
+  color: var(--tekst-primaer);
+  line-height: var(--linjehoyde-normal);
+  margin-bottom: var(--space-4);
+}
+
+/* Nøkkeltall */
+.nokkeltallRad {
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+  padding: var(--space-4) 0;
+  border-top: 1px solid rgba(24, 28, 98, 0.1);
+  border-bottom: 1px solid rgba(24, 28, 98, 0.1);
+}
+
+.nokkeltallItem {
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
+}
+
+.nokkeltallVerdi {
+  font-family: var(--font-tall);
+  font-size: var(--tekst-2xl);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+  line-height: var(--linjehoyde-tett);
+}
+
+.nokkeltallEtikett {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-xs);
+  color: var(--tekst-sekundaer);
+  margin-top: var(--space-1);
+}
+
+.nokkeltallEndring {
+  font-family: var(--font-tall);
+  font-size: var(--tekst-xs);
+  margin-top: 2px;
+  color: var(--tekst-deaktivert);
+}
+
+.nokkeltallEndring[data-retning="opp"][data-positivt="opp"],
+.nokkeltallEndring[data-retning="ned"][data-positivt="ned"] {
+  color: var(--farge-okning);
+}
+
+.nokkeltallEndring[data-retning="opp"][data-positivt="ned"],
+.nokkeltallEndring[data-retning="ned"][data-positivt="opp"] {
+  color: var(--farge-nedgang);
+}
+
+/* Handlinger */
+.handlinger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.lesMerKnapp {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  font-weight: var(--vekt-semibold);
+  color: var(--bg-hvit);
+  background-color: var(--reg-marine);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+  transition: background-color var(--varighet-rask) var(--easing-standard);
+}
+
+.lesMerKnapp:hover {
+  background-color: var(--reg-blaa);
+}
+
+.pdfLenke {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  color: var(--reg-blaa);
+  text-decoration: none;
+}
+
+.pdfLenke:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .boks {
+    padding: var(--space-4);
+  }
+
+  .tittel {
+    font-size: var(--tekst-lg);
+  }
+
+  .nokkeltallRad {
+    gap: var(--space-3);
+  }
+
+  .nokkeltallItem {
+    min-width: calc(50% - var(--space-3));
+  }
+
+  .handlinger {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

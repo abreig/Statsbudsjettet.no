@@ -23,6 +23,13 @@ export default function Header({ aar = 2026 }: HeaderProps) {
     <header className={styles.header}>
       <div className={styles.headerInner}>
         <Link href={`/${aar}`} className={styles.logo}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/rikslove.svg`}
+            alt=""
+            className={styles.rikslove}
+            aria-hidden="true"
+          />
           Statsbudsjettet
         </Link>
 

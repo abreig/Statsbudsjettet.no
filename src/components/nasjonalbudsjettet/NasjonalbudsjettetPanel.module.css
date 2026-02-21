@@ -1,0 +1,132 @@
+/* Overlay — dimmer bakgrunnen */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: var(--z-overlay);
+  animation: fadeIn var(--varighet-normal) var(--easing-ut);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Panel — glir inn fra høyre */
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 60%;
+  max-width: 800px;
+  background-color: var(--bg-hvit);
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 32px rgba(12, 16, 69, 0.15);
+  animation: slideIn var(--varighet-normal) var(--easing-ut);
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Sticky header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--reg-lysgraa);
+  background-color: var(--bg-hvit);
+  flex-shrink: 0;
+}
+
+.lukkKnapp {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  font-weight: var(--vekt-medium);
+  color: var(--reg-blaa);
+  background: none;
+  border: 1px solid var(--reg-lysgraa);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+  transition: background-color var(--varighet-rask) var(--easing-standard);
+  flex-shrink: 0;
+}
+
+.lukkKnapp:hover {
+  background-color: var(--bg-sand);
+}
+
+.panelTittel {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-lg);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+  margin: 0;
+}
+
+/* Scrollbart innhold */
+.innhold {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-6);
+}
+
+/* PDF-lenke nederst */
+.bunntekst {
+  margin-top: var(--space-8);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--reg-lysgraa);
+  text-align: center;
+}
+
+.pdfLenke {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  font-weight: var(--vekt-semibold);
+  color: var(--reg-blaa);
+  text-decoration: none;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--reg-blaa);
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  transition: background-color var(--varighet-rask) var(--easing-standard);
+}
+
+.pdfLenke:hover {
+  background-color: color-mix(in srgb, var(--reg-blaa) 8%, transparent);
+}
+
+/* Responsivt */
+@media (max-width: 1024px) {
+  .panel {
+    width: 80%;
+  }
+}
+
+@media (max-width: 640px) {
+  .panel {
+    width: 100%;
+    max-width: none;
+  }
+
+  .innhold {
+    padding: var(--space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+  .overlay {
+    animation: none;
+  }
+}

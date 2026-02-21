@@ -29,9 +29,8 @@ export default function HeroSection({
 }: HeroSectionProps) {
   return (
     <section className={styles.hero} id="hero">
-      <div className={styles.aarstall}>{aar}</div>
-      <h1 className={styles.tittel}>{tittel}</h1>
       {undertittel && <p className={styles.undertittel}>{undertittel}</p>}
+      <h1 className={styles.tittel}>{tittel}</h1>
 
       <div className={styles.nokkeltall} role="list" aria-label="Nøkkeltall fra statsbudsjettet">
         {nokkeltall.map((tall) => {
