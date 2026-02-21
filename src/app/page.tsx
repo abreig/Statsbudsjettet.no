@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
-const GJELDENDE_BUDSJETTAAR = 2025;
+const GJELDENDE_BUDSJETTAAR = 2026;
 
 export const metadata: Metadata = {
   alternates: {

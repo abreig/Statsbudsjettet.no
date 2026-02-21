@@ -5,11 +5,13 @@ import dynamic from "next/dynamic";
 import StackedBarChart from "./StackedBarChart";
 import ModalOverlay from "@/components/shared/ModalOverlay";
 import { formaterBelop } from "@/components/shared/NumberFormat";
-import type { AggregertBudsjett, KontantstromKilde } from "@/components/data/types/budget";
+import type { AggregertBudsjett, KontantstromKilde, Programomraade } from "@/components/data/types/budget";
+import { hentAggregertOmtale } from "@/lib/mock-omtaler";
 import styles from "./StackedBarChart.module.css";
 
 const DrillDownPanel = dynamic(() => import("./DrillDownPanel"), { ssr: false });
 import { useDrillDown } from "@/components/data/hooks/useDrillDown";
+import { useMultiAreaDrillDown } from "@/components/data/hooks/useMultiAreaDrillDown";
 
 interface BudsjettSeksjonProps {
   data: AggregertBudsjett;
@@ -29,27 +31,52 @@ const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
       id: string;
     } | null>(null);
 
+    // Ekstra state for valgt område i multi-area modus
+    const [valgtOmrNr, setValgtOmrNr] = useState<number | null>(null);
+
     const [visKontantstrom, setVisKontantstrom] = useState(false);
 
-    // Finn omr_nr basert på segment-id
-    const finnOmrNr = useCallback(
-      (side: "utgift" | "inntekt", id: string): number | null => {
+    // Finn omr_nr eller omr_gruppe basert på segment-id
+    const finnKategori = useCallback(
+      (side: "utgift" | "inntekt", id: string) => {
         const kategorier =
           side === "utgift" ? data.utgifter_aggregert : data.inntekter_aggregert;
-        const kat = kategorier.find((k) => k.id === id);
-        if (kat?.omr_nr) return kat.omr_nr;
-        // For grupperte kategorier (f.eks. folketrygden), bruk første omr_nr
-        if (kat?.omr_gruppe && kat.omr_gruppe.length > 0) return kat.omr_gruppe[0];
-        return null;
+        return kategorier.find((k) => k.id === id) ?? null;
       },
       [data]
     );
 
-    const omrNr = drillDown ? finnOmrNr(drillDown.side, drillDown.id) : null;
+    // Bestem om dette er en multi-area kategori (har omr_gruppe men ikke omr_nr)
+    const erMultiArea: boolean = drillDown
+      ? (() => {
+          const kat = finnKategori(drillDown.side, drillDown.id);
+          return !!(kat && !kat.omr_nr && kat.omr_gruppe && kat.omr_gruppe.length > 1);
+        })()
+      : false;
+
+    // For single-area: finn omr_nr direkte
+    const omrNr = drillDown
+      ? (() => {
+          if (valgtOmrNr !== null) return valgtOmrNr;
+          const kat = finnKategori(drillDown.side, drillDown.id);
+          if (kat?.omr_nr) return kat.omr_nr;
+          if (kat?.omr_gruppe && kat.omr_gruppe.length === 1) return kat.omr_gruppe[0];
+          return null;
+        })()
+      : null;
+
+    // Multi-area data (laster alle områder for "Øvrige" kategorier)
+    const multiOmrNrs = drillDown && erMultiArea && valgtOmrNr === null
+      ? finnKategori(drillDown.side, drillDown.id)?.omr_gruppe ?? null
+      : null;
+    const multiAreaData = useMultiAreaDrillDown(aar, multiOmrNrs, drillDown?.side ?? "utgift");
+
+    // Single-area data
     const drillDownData = useDrillDown(aar, omrNr, drillDown?.side ?? "utgift");
 
     const handleSegmentClick = useCallback(
       (side: "utgift" | "inntekt", id: string) => {
+        setValgtOmrNr(null);
         setDrillDown({ side, id });
       },
       []
@@ -57,6 +84,7 @@ const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
 
     const handleClose = useCallback(() => {
       setDrillDown(null);
+      setValgtOmrNr(null);
     }, []);
 
     const handleKontantstromClick = useCallback(() => {
@@ -66,17 +94,22 @@ const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
     // Eksponér openDrillDown for eksterne kall (f.eks. fra PlanSection)
     useImperativeHandle(ref, () => ({
       openDrillDown(side: "utgift" | "inntekt", omrNr: number) {
-        // Finn segment-id fra omrNr
         const kategorier =
           side === "utgift" ? data.utgifter_aggregert : data.inntekter_aggregert;
         const kat = kategorier.find(
           (k) => k.omr_nr === omrNr || (k.omr_gruppe && k.omr_gruppe.includes(omrNr))
         );
         if (kat) {
+          setValgtOmrNr(null);
           setDrillDown({ side, id: kat.id });
         }
       },
     }));
+
+    // Bestem om modalen skal åpnes
+    const singleAreaReady = drillDown !== null && omrNr !== null && drillDownData.data !== null;
+    const multiAreaReady = drillDown !== null && erMultiArea && valgtOmrNr === null && multiAreaData.data !== null;
+    const modalOpen = singleAreaReady || multiAreaReady;
 
     return (
       <section id="budsjett" style={{ padding: "var(--space-8) 0" }}>
@@ -133,11 +166,27 @@ const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
 
         {/* Drill-down modal */}
         <ModalOverlay
-          open={drillDown !== null && drillDownData.data !== null}
+          open={modalOpen}
           onClose={handleClose}
-          ariaLabel={drillDownData.data?.navn ?? "Drill-down"}
+          ariaLabel={
+            singleAreaReady
+              ? drillDownData.data?.navn ?? "Drill-down"
+              : finnKategori(drillDown?.side ?? "utgift", drillDown?.id ?? "")?.navn ?? "Drill-down"
+          }
         >
-          {drillDown && drillDownData.data && (
+          {/* Multi-area oversikt (for "Øvrige" kategorier) */}
+          {multiAreaReady && multiAreaData.data && drillDown && (
+            <MultiAreaOversikt
+              kategorinavn={finnKategori(drillDown.side, drillDown.id)?.navn ?? ""}
+              omraader={multiAreaData.data}
+              side={drillDown.side}
+              onVelgOmraade={(nr) => setValgtOmrNr(nr)}
+              onClose={handleClose}
+            />
+          )}
+
+          {/* Single-area drill-down */}
+          {singleAreaReady && drillDownData.data && drillDown && (
             <DrillDownPanel
               data={drillDownData.data}
               hierarkiSti={[
@@ -155,6 +204,7 @@ const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
               onNavigate={() => {}}
               onClose={handleClose}
               visEndring={false}
+              omtale={hentAggregertOmtale(aar, drillDown.id)}
             />
           )}
         </ModalOverlay>
@@ -177,6 +227,190 @@ const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
 );
 
 export default BudsjettSeksjon;
+
+/* ---------------------------------------------------------------
+   Multi-area oversikt (for "Øvrige" kategorier med mange omr)
+   --------------------------------------------------------------- */
+
+function MultiAreaOversikt({
+  kategorinavn,
+  omraader,
+  side,
+  onVelgOmraade,
+  onClose,
+}: {
+  kategorinavn: string;
+  omraader: Programomraade[];
+  side: "utgift" | "inntekt";
+  onVelgOmraade: (omrNr: number) => void;
+  onClose: () => void;
+}) {
+  const totalBelop = omraader.reduce((s, o) => s + o.total, 0);
+
+  return (
+    <div style={{ padding: "var(--space-5)" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          marginBottom: "var(--space-4)",
+        }}
+      >
+        <div>
+          <h3
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "var(--tekst-2xl)",
+              fontWeight: "var(--vekt-bold)",
+              color: "var(--reg-marine)",
+              marginBottom: "var(--space-1)",
+            }}
+          >
+            {kategorinavn}
+          </h3>
+          <div
+            style={{
+              fontFamily: "var(--font-tall)",
+              fontSize: "var(--tekst-xl)",
+              color: "var(--tekst-sekundaer)",
+            }}
+          >
+            {formaterBelop(totalBelop)}
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          aria-label="Lukk"
+          style={{
+            background: "none",
+            border: "1px solid var(--reg-lysgraa)",
+            borderRadius: "var(--radius-sm)",
+            padding: "var(--space-2)",
+            cursor: "pointer",
+            fontSize: "var(--tekst-lg)",
+            lineHeight: 1,
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      <p
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontSize: "var(--tekst-sm)",
+          color: "var(--tekst-sekundaer)",
+          lineHeight: "var(--linjehoyde-normal)",
+          marginBottom: "var(--space-4)",
+        }}
+      >
+        Denne kategorien består av {omraader.length} programområder. Velg et
+        område for å se detaljene.
+      </p>
+
+      <ul
+        style={{
+          listStyle: "none",
+          padding: 0,
+          margin: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: "var(--space-2)",
+        }}
+        role="list"
+      >
+        {omraader.map((omr) => {
+          const andel = totalBelop > 0 ? (omr.total / totalBelop) * 100 : 0;
+          return (
+            <li key={omr.omr_nr}>
+              <button
+                onClick={() => onVelgOmraade(omr.omr_nr)}
+                aria-label={`${omr.navn}: ${formaterBelop(omr.total)}. Klikk for detaljer.`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  width: "100%",
+                  gap: "var(--space-3)",
+                  padding: "var(--space-3)",
+                  border: "1px solid var(--reg-lysgraa)",
+                  borderRadius: "var(--radius-md)",
+                  background: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-sans)",
+                  textAlign: "left",
+                  transition: "border-color 0.15s ease",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--reg-blaa)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--reg-lysgraa)";
+                }}
+              >
+                <div
+                  style={{
+                    width: 6,
+                    minHeight: 32,
+                    height: `${Math.max(32, andel * 1.2)}px`,
+                    borderRadius: 3,
+                    backgroundColor: side === "utgift" ? "var(--reg-blaa)" : "var(--reg-teal)",
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: "var(--tekst-sm)",
+                      fontWeight: "var(--vekt-medium)",
+                      color: "var(--tekst-primaer)",
+                    }}
+                  >
+                    {omr.navn}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-tall)",
+                    fontSize: "var(--tekst-sm)",
+                    color: "var(--tekst-sekundaer)",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                  }}
+                >
+                  {formaterBelop(omr.total)}
+                </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-tall)",
+                    fontSize: "var(--tekst-xs)",
+                    color: "var(--tekst-deaktivert)",
+                    whiteSpace: "nowrap",
+                    width: "3.5rem",
+                    textAlign: "right",
+                    flexShrink: 0,
+                  }}
+                >
+                  {andel.toFixed(1)} %
+                </div>
+                <span
+                  style={{
+                    color: "var(--tekst-deaktivert)",
+                    fontSize: "var(--tekst-lg)",
+                    flexShrink: 0,
+                  }}
+                  aria-hidden="true"
+                >
+                  ›
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
 
 /* ---------------------------------------------------------------
    Kontantstrøm-innhold (vist i ModalOverlay)
