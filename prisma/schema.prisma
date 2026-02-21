@@ -2,7 +2,7 @@
 // Basert på databasemodellen i CMS_oppdatert.md seksjon 4
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
