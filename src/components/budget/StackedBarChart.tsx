@@ -31,12 +31,12 @@ const KS_BOX_W = 164;
 const KS_BOX_H = 48;
 const SPU_GAP = 60; // avstand mellom inntektsbar og SPU-sone
 
-// Beregn sentrert layout
-const CONTENT_W = BAR_W * 2 + BAR_GAP + SPU_GAP + Math.max(SPU_BOX_W, KS_BOX_W);
-const SVG_W = CONTENT_W + 80; // 40px padding på hver side
-const LEFT_PAD = Math.round((SVG_W - CONTENT_W) / 2);
-
-const UTGIFT_X = LEFT_PAD;
+// Beregn sentrert layout — søylene (Utgifter + Inntekter) sentreres,
+// SPU-sonen strekker seg til høyre
+const BARS_W = BAR_W * 2 + BAR_GAP;
+const SPU_SIDE_W = SPU_GAP + Math.max(SPU_BOX_W, KS_BOX_W);
+const SVG_W = BARS_W + 2 * SPU_SIDE_W + 40;
+const UTGIFT_X = Math.round(SVG_W / 2 - BARS_W / 2);
 const INNTEKT_X = UTGIFT_X + BAR_W + BAR_GAP;
 const SPU_ZONE_X = INNTEKT_X + BAR_W + SPU_GAP;
 

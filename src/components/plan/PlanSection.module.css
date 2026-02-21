@@ -13,11 +13,12 @@
 
 .temaGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: var(--space-4);
 }
 
 .temaKort {
+  grid-column: span 2;
   border: 1px solid var(--reg-lysgraa);
   border-radius: var(--radius-md);
   padding: var(--space-4);
@@ -25,6 +26,14 @@
   cursor: pointer;
   transition: box-shadow var(--varighet-rask) var(--easing-standard),
     transform var(--varighet-rask) var(--easing-standard);
+}
+
+.temaKort:nth-child(4) {
+  grid-column: 2 / span 2;
+}
+
+.temaKort:nth-child(5) {
+  grid-column: 4 / span 2;
 }
 
 .temaKort:hover {
@@ -166,6 +175,18 @@
 @media (max-width: 1024px) {
   .temaGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .temaKort {
+    grid-column: span 1;
+  }
+
+  .temaKort:nth-child(4) {
+    grid-column: span 1;
+  }
+
+  .temaKort:nth-child(5) {
+    grid-column: span 1;
   }
 }
 
