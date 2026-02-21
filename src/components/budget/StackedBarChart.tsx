@@ -244,7 +244,7 @@ export default function StackedBarChart({
 
           {/* INNTEKTER (ordinære) */}
           <text x={INNTEKT_X + BAR_W / 2} y={28} textAnchor="middle" fontSize={11} fontWeight={600} fill="#888" letterSpacing="0.12em">INNTEKTER</text>
-          <text x={INNTEKT_X + BAR_W / 2} y={52} textAnchor="middle" fontFamily="Georgia, serif" fontSize={22} fontWeight={700} fill="#0C1045">{formaterMrd(utgTotal)}</text>
+          <text x={INNTEKT_X + BAR_W / 2} y={52} textAnchor="middle" fontFamily="Georgia, serif" fontSize={22} fontWeight={700} fill="#0C1045">{formaterMrd(ordTotal)}</text>
           <text x={INNTEKT_X + BAR_W / 2} y={68} textAnchor="middle" fontSize={10} fill="#aaa">mrd. kr (totalt)</text>
 
           {iSegs.map((s) => (
