@@ -9,6 +9,8 @@ import BudsjettSeksjon from "@/components/budget/BudsjettSeksjon";
 import type { BudsjettSeksjonHandle } from "@/components/budget/BudsjettSeksjon";
 import Nokkeltall from "@/components/shared/Nokkeltall";
 import EgendefinertTekst from "@/components/shared/EgendefinertTekst";
+import NasjonalbudsjettetModul from "@/components/nasjonalbudsjettet/NasjonalbudsjettetModul";
+import { hentNasjonalbudsjettetData } from "@/components/nasjonalbudsjettet/mock-nasjonalbudsjettet";
 
 interface ModulRendrerProps {
   moduler: ModulKonfigurasjon[];
@@ -101,6 +103,12 @@ function ModulKomponent({
           onBudsjettNavigasjon={onBudsjettNavigasjon}
         />
       );
+
+    case "nasjonalbudsjettet": {
+      const nasjonalbudsjettetData = hentNasjonalbudsjettetData(aar);
+      if (!nasjonalbudsjettetData) return null;
+      return <NasjonalbudsjettetModul konfigurasjon={nasjonalbudsjettetData} aar={aar} />;
+    }
 
     case "budsjettgrafer": {
       if (!aggregertData) return null;

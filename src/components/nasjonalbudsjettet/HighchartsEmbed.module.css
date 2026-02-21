@@ -1,0 +1,50 @@
+.figur {
+  margin: 0;
+}
+
+.iframeWrapper {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--bg-hvit);
+  border: 1px solid var(--reg-lysgraa);
+}
+
+.iframeWrapper iframe {
+  display: block;
+}
+
+.lasterWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--reg-lysgraa);
+  border-radius: var(--radius-md);
+  background-color: #f8f8f9;
+}
+
+.lasterTekst {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  color: var(--tekst-deaktivert);
+}
+
+.figurtekst {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) 0;
+}
+
+.grafTittel {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  font-weight: var(--vekt-semibold);
+  color: var(--tekst-primaer);
+}
+
+.kilde {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-xs);
+  color: var(--tekst-deaktivert);
+  font-style: italic;
+}

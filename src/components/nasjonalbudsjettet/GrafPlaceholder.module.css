@@ -1,0 +1,46 @@
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--reg-lysgraa);
+  border-radius: var(--radius-md);
+  background-color: #f8f8f9;
+  padding: var(--space-4);
+}
+
+.innhold {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 280px;
+  text-align: center;
+}
+
+.ikon {
+  color: var(--tekst-deaktivert);
+  margin-bottom: var(--space-2);
+}
+
+.label {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-xs);
+  font-weight: var(--vekt-semibold);
+  color: var(--tekst-deaktivert);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.tittel {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-base);
+  font-weight: var(--vekt-semibold);
+  color: var(--tekst-sekundaer);
+}
+
+.beskrivelse {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-sm);
+  color: var(--tekst-deaktivert);
+  line-height: var(--linjehoyde-normal);
+}

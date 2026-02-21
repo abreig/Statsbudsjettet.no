@@ -95,7 +95,7 @@ const MOCK_2026: CMSBudsjettaar = {
       rekkefolge: 0,
       konfigurasjon: {
         tittel: "Statsbudsjettet 2026",
-        undertittel: "Regjeringens plan for Norge",
+        undertittel: "Regjeringens forslag til",
         nokkeltall: [
           { etikett: "Utgifter uten olje og gass", datareferanse: "oljekorrigert.utgifter_total" },
           { etikett: "Inntekter uten olje og gass", datareferanse: "oljekorrigert.inntekter_total" },
@@ -124,9 +124,15 @@ const MOCK_2026: CMSBudsjettaar = {
       },
     },
     {
-      type: "nokkeltall",
+      type: "nasjonalbudsjettet",
       synlig: true,
       rekkefolge: 3,
+      konfigurasjon: {},
+    },
+    {
+      type: "nokkeltall",
+      synlig: true,
+      rekkefolge: 4,
       konfigurasjon: {
         tittel: "Nøkkeltall",
         layout: "horisontal",
@@ -256,7 +262,7 @@ const MOCK_2025: CMSBudsjettaar = {
       rekkefolge: 0,
       konfigurasjon: {
         tittel: "Statsbudsjettet 2025",
-        undertittel: "Regjeringens plan for Norge",
+        undertittel: "Regjeringens forslag til",
         nokkeltall: [
           { etikett: "Utgifter uten olje og gass", datareferanse: "oljekorrigert.utgifter_total" },
           { etikett: "Inntekter uten olje og gass", datareferanse: "oljekorrigert.inntekter_total" },
@@ -285,9 +291,15 @@ const MOCK_2025: CMSBudsjettaar = {
       },
     },
     {
-      type: "nokkeltall",
+      type: "nasjonalbudsjettet",
       synlig: true,
       rekkefolge: 3,
+      konfigurasjon: {},
+    },
+    {
+      type: "nokkeltall",
+      synlig: true,
+      rekkefolge: 4,
       konfigurasjon: {
         tittel: "Nøkkeltall",
         layout: "horisontal",

@@ -1,0 +1,67 @@
+.seksjoner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Tekst-seksjon */
+.tekstSeksjon {
+  margin-bottom: var(--space-2);
+}
+
+.tekstOverskrift {
+  font-family: var(--font-serif);
+  font-size: var(--tekst-xl);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+  margin-bottom: var(--space-3);
+}
+
+.tekstInnhold {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-base);
+  color: var(--tekst-primaer);
+  line-height: var(--linjehoyde-romslig);
+}
+
+.tekstInnhold p {
+  margin-bottom: var(--space-3);
+}
+
+.tekstInnhold p:last-child {
+  margin-bottom: 0;
+}
+
+/* Nøkkeltall-rad */
+.nokkeltallRad {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-4);
+  background-color: var(--bg-sand);
+  border-radius: var(--radius-md);
+}
+
+.nokkeltallItem {
+  flex: 1;
+  min-width: 100px;
+  text-align: center;
+}
+
+.nokkeltallVerdi {
+  font-family: var(--font-tall);
+  font-size: var(--tekst-2xl);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+}
+
+.nokkeltallEtikett {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-xs);
+  color: var(--tekst-sekundaer);
+  margin-top: var(--space-1);
+}
+
+.nokkeltallEnhet {
+  font-style: italic;
+}
