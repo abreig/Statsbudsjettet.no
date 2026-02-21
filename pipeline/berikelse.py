@@ -149,6 +149,11 @@ def generer_aggregert_utgifter(df: pd.DataFrame) -> list[dict]:
         utgifter[~utgifter["omr_nr"].isin(kjente_omraader)]["GB"].sum()
     )
 
+    # Beregn omr_gruppe for "Øvrige utgifter" dynamisk
+    ovrige_omr = sorted(
+        utgifter[~utgifter["omr_nr"].isin(kjente_omraader)]["omr_nr"].unique().tolist()
+    )
+
     kategorier = [
         {"id": "folketrygden", "navn": "Folketrygden", "belop": folketrygd_belop, "omr_gruppe": [28, 29, 30, 33]},
         {"id": "kommuner", "navn": "Kommuner og distrikter", "belop": kommuner_belop, "omr_nr": 13},
@@ -157,7 +162,7 @@ def generer_aggregert_utgifter(df: pd.DataFrame) -> list[dict]:
         {"id": "naering", "navn": "Næring og fiskeri", "belop": naering_belop, "omr_nr": 17},
         {"id": "forsvar", "navn": "Forsvar", "belop": forsvar_belop, "omr_nr": 4},
         {"id": "transport", "navn": "Innenlands transport", "belop": transport_belop, "omr_nr": 21},
-        {"id": "ovrige_utgifter", "navn": "Øvrige utgifter", "belop": ovrige_belop},
+        {"id": "ovrige_utgifter", "navn": "Øvrige utgifter", "belop": ovrige_belop, "omr_gruppe": ovrige_omr},
     ]
 
     # Sorter fra størst til minst, tildel farge fra monokromatisk skala
@@ -208,12 +213,22 @@ def generer_aggregert_inntekter(df: pd.DataFrame) -> list[dict]:
     kjent_sum = mva_belop + arb_avg_belop + trygd_belop + skatt_person_belop
     ovrige_belop = totalt_uten_spu_og_petro - kjent_sum
 
+    # Beregn omr_gruppe for "Øvrige inntekter" dynamisk (ekskl. omr 25, 34 og petroleum/SPU)
+    ekskluderte_kap = {5800} | PETROLEUM_KAP
+    ovrige_inn_omr = sorted(
+        inntekter[
+            (~inntekter["kap_nr"].isin(ekskluderte_kap)) &
+            (inntekter["omr_nr"] != 25) &
+            (inntekter["omr_nr"] != 34)
+        ]["omr_nr"].unique().tolist()
+    )
+
     kategorier = [
-        {"id": "skatt_person", "navn": "Skatt på inntekt og formue", "belop": skatt_person_belop},
-        {"id": "mva", "navn": "Merverdiavgift", "belop": mva_belop},
-        {"id": "arbeidsgiveravgift", "navn": "Arbeidsgiveravgift", "belop": arb_avg_belop},
-        {"id": "trygdeavgift", "navn": "Trygdeavgift", "belop": trygd_belop},
-        {"id": "ovrige_inntekter", "navn": "Øvrige inntekter", "belop": ovrige_belop},
+        {"id": "skatt_person", "navn": "Skatt på inntekt og formue", "belop": skatt_person_belop, "omr_nr": 25},
+        {"id": "mva", "navn": "Merverdiavgift", "belop": mva_belop, "omr_nr": 25},
+        {"id": "arbeidsgiveravgift", "navn": "Arbeidsgiveravgift", "belop": arb_avg_belop, "omr_nr": 25},
+        {"id": "trygdeavgift", "navn": "Trygdeavgift", "belop": trygd_belop, "omr_nr": 25},
+        {"id": "ovrige_inntekter", "navn": "Øvrige inntekter", "belop": ovrige_belop, "omr_gruppe": ovrige_inn_omr},
     ]
 
     # Sorter fra størst til minst, tildel farge fra monokromatisk teal-skala

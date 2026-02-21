@@ -14,7 +14,14 @@ FORVENTEDE_TOTALER = {
         "oljekorrigert_utgifter_mrd": 2246.0,
         "oljekorrigert_inntekter_mrd": 1718.8,
         "margin_mrd": 0.5,
-    }
+    },
+    2026: {
+        "utgifter_mrd": 2955.2,
+        "inntekter_mrd": 2859.7,
+        "oljekorrigert_utgifter_mrd": 2433.9,
+        "oljekorrigert_inntekter_mrd": 1859.4,
+        "margin_mrd": 0.5,
+    },
 }
 
 

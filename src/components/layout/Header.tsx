@@ -10,7 +10,7 @@ interface HeaderProps {
   aar?: number;
 }
 
-export default function Header({ aar = 2025 }: HeaderProps) {
+export default function Header({ aar = 2026 }: HeaderProps) {
   const [menyAapen, setMenyAapen] = useState(false);
   const router = useRouter();
 

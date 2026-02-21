@@ -8,6 +8,7 @@ import type {
   Post,
   HierarkiNode,
 } from "@/components/data/types/budget";
+import type { OmrOmtale } from "@/lib/mock-omtaler";
 import { formaterBelop } from "@/components/shared/NumberFormat";
 import styles from "./DrillDownPanel.module.css";
 
@@ -17,6 +18,7 @@ interface DrillDownPanelProps {
   onNavigate: (node: HierarkiNode) => void;
   onClose: () => void;
   visEndring: boolean;
+  omtale?: OmrOmtale | null;
 }
 
 function erProgramomraade(data: unknown): data is Programomraade {
@@ -39,6 +41,7 @@ export default function DrillDownPanel({
   data: initialData,
   hierarkiSti: initialSti,
   onClose,
+  omtale,
 }: DrillDownPanelProps) {
   // Intern state for dypere navigering
   const [navigasjonsStakk, setNavigasjonsStakk] = useState<
@@ -106,6 +109,11 @@ export default function DrillDownPanel({
           ✕
         </button>
       </div>
+
+      {/* Redaksjonell omtale (vises kun på toppnivå — programområde) */}
+      {omtale && navigasjonsStakk.length === 1 && (
+        <OmtaleVisning omtale={omtale} />
+      )}
 
       {/* Innhold basert på datanivå */}
       {erProgramomraade(data) && (
@@ -210,6 +218,62 @@ function KategoriListe({
         </li>
       ))}
     </ul>
+  );
+}
+
+function OmtaleVisning({ omtale }: { omtale: OmrOmtale }) {
+  return (
+    <div className={styles.omtale}>
+      {omtale.ingress && (
+        <p className={styles.omtaleIngress}>{omtale.ingress}</p>
+      )}
+      {omtale.brodtekst && (
+        <div className={styles.omtaleBrodtekst}>
+          {omtale.brodtekst.split("\n\n").map((avsnitt, i) => (
+            <p key={i}>{avsnitt}</p>
+          ))}
+        </div>
+      )}
+      {omtale.grafer && omtale.grafer.length > 0 && (
+        <div className={styles.omtaleGrafer}>
+          {omtale.grafer.map((graf, i) => (
+            <div key={i} className={styles.grafContainer}>
+              <h4 className={styles.grafTittel}>{graf.tittel}</h4>
+              {graf.type === "barplot" && graf.manuellData && (
+                <MiniBarplot data={graf.manuellData} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MiniBarplot({ data }: { data: { etikett: string; verdi: number }[] }) {
+  const maxVerdi = Math.max(...data.map((d) => d.verdi));
+  const maxHoyde = 100;
+
+  return (
+    <div className={styles.miniBarplot} role="img" aria-label="Søylediagram">
+      {data.map((d, i) => {
+        const hoyde = maxVerdi > 0 ? (d.verdi / maxVerdi) * maxHoyde : 0;
+        const erSiste = i === data.length - 1;
+        return (
+          <div key={d.etikett} className={styles.barplotKolonne}>
+            <div className={styles.barplotVerdi}>{d.verdi}</div>
+            <div
+              className={styles.barplotBar}
+              style={{
+                height: `${hoyde}px`,
+                backgroundColor: erSiste ? "var(--reg-marine)" : "var(--reg-lyseblaa)",
+              }}
+            />
+            <div className={styles.barplotEtikett}>{d.etikett}</div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

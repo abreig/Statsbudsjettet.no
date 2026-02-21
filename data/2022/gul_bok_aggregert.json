@@ -19,6 +19,22 @@
       "id": "ovrige_utgifter",
       "navn": "Øvrige utgifter",
       "belop": 307424729000,
+      "omr_gruppe": [
+        0,
+        2,
+        3,
+        6,
+        8,
+        9,
+        11,
+        12,
+        15,
+        18,
+        22,
+        23,
+        24,
+        26
+      ],
       "farge": "#181C62"
     },
     {
@@ -69,30 +85,56 @@
       "id": "mva",
       "navn": "Merverdiavgift",
       "belop": 360500000000,
+      "omr_nr": 25,
       "farge": "#004D52"
     },
     {
       "id": "ovrige_inntekter",
       "navn": "Øvrige inntekter",
       "belop": 321833136000,
+      "omr_gruppe": [
+        0,
+        2,
+        4,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        15,
+        17,
+        18,
+        21,
+        23,
+        24,
+        26,
+        29,
+        33
+      ],
       "farge": "#006B73"
     },
     {
       "id": "skatt_person",
       "navn": "Skatt på inntekt og formue",
       "belop": 308210000000,
+      "omr_nr": 25,
       "farge": "#008286"
     },
     {
       "id": "arbeidsgiveravgift",
       "navn": "Arbeidsgiveravgift",
       "belop": 214101000000,
+      "omr_nr": 25,
       "farge": "#2A9D8F"
     },
     {
       "id": "trygdeavgift",
       "navn": "Trygdeavgift",
       "belop": 166412400000,
+      "omr_nr": 25,
       "farge": "#5AB8AD"
     }
   ],

@@ -15,20 +15,43 @@ NØKKELFELT = ["fdep_nr", "omr_nr", "kat_nr", "kap_nr", "post_nr", "upost_nr"]
 
 
 def les_gul_bok(filsti: str | Path) -> pd.DataFrame:
-    """Leser Gul bok Excel-fil og returnerer renset DataFrame."""
+    """Leser Gul bok Excel-fil og returnerer renset DataFrame.
+    Støtter to formater:
+    - Eldre (2019-2025): Direkte kolonner med GB og upost_nr
+    - Nyere (2026+): Ark «Data», med beløp-kolonne, uten upost_nr
+    """
     filsti = Path(filsti)
     if not filsti.exists():
         raise FileNotFoundError(f"Finner ikke filen: {filsti}")
 
-    df = pd.read_excel(filsti, dtype={"stikkord": str})
+    # Sjekk om filen har et «Data»-ark (nyere format)
+    xl = pd.ExcelFile(filsti)
+    ark = "Data" if "Data" in xl.sheet_names else 0
 
-    # Valider kolonner
-    if list(df.columns) != FORVENTEDE_KOLONNER:
+    df = pd.read_excel(filsti, sheet_name=ark, dtype={"stikkord": str})
+
+    # Håndter nyere format: ekstra kolonner og annet beløpsnavn
+    if "beløp" in df.columns and "GB" not in df.columns:
+        df = df.rename(columns={"beløp": "GB"})
+
+    # Fjern ekstra kolonner som ikke brukes i pipelinen
+    ekstra_kolonner = {"gdep_nr", "avs_nr", "gdep_navn", "avs_navn"}
+    df = df.drop(columns=[k for k in ekstra_kolonner if k in df.columns])
+
+    # Legg til upost_nr = 0 dersom den mangler
+    if "upost_nr" not in df.columns:
+        df["upost_nr"] = 0
+
+    # Valider at vi nå har alle forventede kolonner
+    manglende = set(FORVENTEDE_KOLONNER) - set(df.columns)
+    if manglende:
         raise ValueError(
-            f"Uventede kolonner.\n"
-            f"Forventet: {FORVENTEDE_KOLONNER}\n"
-            f"Fikk: {list(df.columns)}"
+            f"Mangler kolonner etter normalisering: {manglende}\n"
+            f"Har: {list(df.columns)}"
         )
+
+    # Behold kun forventede kolonner i riktig rekkefølge
+    df = df[FORVENTEDE_KOLONNER]
 
     # Normaliser tekstverdier (trim mellomrom)
     for kol in ["fdep_navn", "omr_navn", "kat_navn", "kap_navn", "post_navn"]:
