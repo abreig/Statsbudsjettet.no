@@ -1,11 +1,15 @@
 {
   "budsjettaar": 2022,
-  "publisert": "2026-02-20",
+  "publisert": "2026-02-21",
   "kilde": "Gul bok 2022",
   "saldert_budsjett_forrige": "2021",
   "totaler": {
     "utgifter": 2062493768000,
     "inntekter": 1968611653000
+  },
+  "oljekorrigert_totaler": {
+    "utgifter": 1715392768000,
+    "inntekter": 1371056536000
   },
   "spu": {
     "overfoering_til_fond": 277101000000,
@@ -35,7 +39,8 @@
         "navn": "Andre petroleumsinnt.",
         "belop": 49801000000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": 2764768000
   },
   "antall_poster": {
     "utgifter": null,

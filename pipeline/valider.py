@@ -11,6 +11,8 @@ FORVENTEDE_TOTALER = {
     2025: {
         "utgifter_mrd": 2970.9,
         "inntekter_mrd": 2796.8,
+        "oljekorrigert_utgifter_mrd": 2246.0,
+        "oljekorrigert_inntekter_mrd": 1718.8,
         "margin_mrd": 0.5,
     }
 }
@@ -127,6 +129,49 @@ def valider_json_filer(datamappe: Path, budsjettaar: int) -> list[str]:
             f"inn={sum_agg_inntekter}, fond={fondsuttak}, "
             f"diff={sum_agg_utgifter - sum_agg_inntekter - fondsuttak}"
         )
+
+    # Sjekk at total_utgifter i aggregert JSON == sum(utgifter_aggregert)
+    if "total_utgifter" in agg_data:
+        if abs(agg_data["total_utgifter"] - sum_agg_utgifter) > 1000:
+            feil.append(
+                f"total_utgifter i aggregert != sum(utgifter_aggregert): "
+                f"{agg_data['total_utgifter']} != {sum_agg_utgifter}"
+            )
+
+    # Valider oljekorrigert seksjon i full JSON
+    if "oljekorrigert" not in full_data:
+        feil.append("Mangler 'oljekorrigert' seksjon i gul_bok_full.json")
+    else:
+        ok = full_data["oljekorrigert"]
+        if abs(ok["utgifter_total"] - sum_agg_utgifter) > 1000:
+            feil.append(
+                f"oljekorrigert.utgifter_total != sum(utgifter_aggregert): "
+                f"{ok['utgifter_total']} != {sum_agg_utgifter}"
+            )
+
+    # Valider oljekorrigerte totaler mot kjente verdier
+    if budsjettaar in FORVENTEDE_TOTALER:
+        forventet = FORVENTEDE_TOTALER[budsjettaar]
+        if "oljekorrigert_utgifter_mrd" in forventet:
+            ok_utg_mrd = sum_agg_utgifter / 1e9
+            if abs(ok_utg_mrd - forventet["oljekorrigert_utgifter_mrd"]) > forventet["margin_mrd"]:
+                feil.append(
+                    f"Oljekorrigert utgifter avviker: {ok_utg_mrd:.1f} mrd. kr "
+                    f"(forventet {forventet['oljekorrigert_utgifter_mrd']:.1f} mrd. kr)"
+                )
+
+    # Sjekk at netto_overfoering_til_spu finnes og er korrekt
+    spu_data = agg_data.get("spu", {})
+    if "netto_overfoering_til_spu" not in spu_data:
+        feil.append("Mangler 'netto_overfoering_til_spu' i spu-data")
+    else:
+        forventet_netto = spu_data.get("netto_kontantstrom", 0) - fondsuttak
+        if abs(spu_data["netto_overfoering_til_spu"] - forventet_netto) > 1000:
+            feil.append(
+                f"netto_overfoering_til_spu feil: "
+                f"{spu_data['netto_overfoering_til_spu']} != "
+                f"kontantstrom({spu_data.get('netto_kontantstrom', 0)}) - fondsuttak({fondsuttak})"
+            )
 
     # Sjekk filstørrelse for aggregert (bør være < 50 KB)
     agg_filstr = (datamappe / "gul_bok_aggregert.json").stat().st_size

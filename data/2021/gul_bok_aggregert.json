@@ -1,7 +1,7 @@
 {
   "budsjettaar": 2021,
-  "total_utgifter": 1836011550000,
-  "total_inntekter": 1738218258000,
+  "total_utgifter": 1737510550000,
+  "total_inntekter": 1737510550000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",
@@ -119,6 +119,7 @@
         "navn": "Equinor-utbytte",
         "belop": 7500000000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": -370486596000
   }
 }

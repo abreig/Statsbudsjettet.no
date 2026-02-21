@@ -57,9 +57,9 @@ def beregn_spu(df: pd.DataFrame) -> dict:
 
     netto = int(overfoering_til) + int(finansposter) - int(overfoering_fra)
 
-    # Fondsuttaket = overføring fra fondet (kap 5800 post 50)
-    # Dette er det faktiske beløpet som overføres fra SPU til statsbudsjettet
-    fondsuttak = int(overfoering_fra)
+    # Fondsuttak beregnes i kjor_pipeline.py som balanseringspost
+    # (oljekorrigert underskudd = utgifter_agg - inntekter_agg)
+    fondsuttak = 0
 
     # Kontantstrøm-kilder (petroleumsinntekter)
     skatt_omr = inntekter[inntekter["omr_nr"] == 25]

@@ -1,7 +1,7 @@
 {
   "budsjettaar": 2022,
-  "total_utgifter": 2062493768000,
-  "total_inntekter": 1968611653000,
+  "total_utgifter": 1715392768000,
+  "total_inntekter": 1715392768000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",
@@ -124,6 +124,7 @@
         "navn": "Andre petroleumsinnt.",
         "belop": 49801000000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": 2764768000
   }
 }

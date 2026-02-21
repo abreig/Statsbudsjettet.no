@@ -1,7 +1,7 @@
 {
   "budsjettaar": 2023,
-  "total_utgifter": 3358329183000,
-  "total_inntekter": 3354693640000,
+  "total_utgifter": 1974028183000,
+  "total_inntekter": 1974028183000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",
@@ -119,6 +119,7 @@
         "navn": "Equinor-utbytte",
         "belop": 15000000000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": 1123616958000
   }
 }

@@ -32,9 +32,14 @@ const mockData: BudgetYear = {
     finansposter_til_fond: 82100000000,
     overfoering_fra_fond: 413647646000,
     netto_overfoering: 311221454000,
-    fondsuttak: 413647646000,
-    netto_kontantstrom: 0,
+    fondsuttak: 527247829000,
+    netto_kontantstrom: 724869100000,
+    netto_overfoering_til_spu: 197621271000,
     kontantstrom_kilder: [],
+  },
+  oljekorrigert: {
+    utgifter_total: 2246013912000,
+    inntekter_total: 1718766083000,
   },
   metadata: {
     kilde: "Gul bok 2025",
@@ -75,6 +80,18 @@ describe("opplosDatareferanse", () => {
 
   it("returnerer null for tom referanse", () => {
     expect(opplosDatareferanse("", mockData)).toBeNull();
+  });
+
+  it("oppløser oljekorrigert utgifter", () => {
+    expect(opplosDatareferanse("oljekorrigert.utgifter_total", mockData)).toBe(2246013912000);
+  });
+
+  it("oppløser oljekorrigert inntekter", () => {
+    expect(opplosDatareferanse("oljekorrigert.inntekter_total", mockData)).toBe(1718766083000);
+  });
+
+  it("oppløser netto overføring til SPU", () => {
+    expect(opplosDatareferanse("spu.netto_overfoering_til_spu", mockData)).toBe(197621271000);
   });
 });
 

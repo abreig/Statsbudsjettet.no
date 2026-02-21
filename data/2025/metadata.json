@@ -1,11 +1,15 @@
 {
   "budsjettaar": 2025,
-  "publisert": "2026-02-20",
+  "publisert": "2026-02-21",
   "kilde": "Gul bok 2025",
   "saldert_budsjett_forrige": "2024",
   "totaler": {
     "utgifter": 2970883012000,
     "inntekter": 2796781829000
+  },
+  "oljekorrigert_totaler": {
+    "utgifter": 2246013912000,
+    "inntekter": 1718766083000
   },
   "spu": {
     "overfoering_til_fond": 642769100000,
@@ -35,7 +39,8 @@
         "navn": "Andre petroleumsinnt.",
         "belop": 60501000000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": 197621271000
   },
   "antall_poster": {
     "utgifter": null,

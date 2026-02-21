@@ -52,7 +52,11 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
     sum_utg = sum(k["belop"] for k in utgifter_agg)
     sum_inn = sum(k["belop"] for k in inntekter_agg)
     spu["fondsuttak"] = sum_utg - sum_inn
+    spu["netto_overfoering_til_spu"] = spu["netto_kontantstrom"] - spu["fondsuttak"]
     print(f"  Fondsuttak (oljekorrigert underskudd): {spu['fondsuttak'] / 1e9:.1f} mrd. kr")
+    print(f"  Netto overføring til SPU: {spu['netto_overfoering_til_spu'] / 1e9:.1f} mrd. kr")
+    print(f"  Oljekorrigerte utgifter: {sum_utg / 1e9:.1f} mrd. kr")
+    print(f"  Ordinære inntekter: {sum_inn / 1e9:.1f} mrd. kr")
 
     print(f"  Aggregerte utgiftskategorier: {len(utgifter_agg)}")
     print(f"  Aggregerte inntektskategorier: {len(inntekter_agg)}")
@@ -61,7 +65,9 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
     print("\nSteg 5: Eksport til JSON...")
     utmappe.mkdir(parents=True, exist_ok=True)
 
-    f1 = eksporter_full(hierarki, spu, budsjettaar, utmappe)
+    f1 = eksporter_full(hierarki, spu, budsjettaar, utmappe,
+                        oljekorrigert_utgifter=sum_utg,
+                        oljekorrigert_inntekter=sum_inn)
     print(f"  → {f1} ({f1.stat().st_size / 1024:.1f} KB)")
 
     f2 = eksporter_aggregert(utgifter_agg, inntekter_agg, spu, budsjettaar, utmappe)
@@ -74,7 +80,9 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
         budsjettaar, spu,
         hierarki["utgifter"]["total"],
         hierarki["inntekter"]["total"],
-        utmappe,
+        oljekorrigert_utgifter=sum_utg,
+        oljekorrigert_inntekter=sum_inn,
+        utmappe=utmappe,
     )
     print(f"  → {f4} ({f4.stat().st_size / 1024:.1f} KB)")
 

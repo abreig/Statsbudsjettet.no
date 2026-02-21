@@ -90,6 +90,7 @@ export interface SPUData {
   netto_overfoering: number;
   fondsuttak: number;
   netto_kontantstrom: number;
+  netto_overfoering_til_spu: number;
   kontantstrom_kilder: KontantstromKilde[];
 }
 
@@ -103,6 +104,15 @@ export interface BudgetMetadata {
 }
 
 // ---------------------------------------------------------------------------
+// Oljekorrigerte totaler (ekskl. SPU-overføringer og petroleumsinntekter)
+// ---------------------------------------------------------------------------
+
+export interface OljekorrigertTotaler {
+  utgifter_total: number;
+  inntekter_total: number;
+}
+
+// ---------------------------------------------------------------------------
 // Nivå 1: Budsjettår (toppnivå)
 // ---------------------------------------------------------------------------
 
@@ -113,6 +123,7 @@ export interface BudgetYear {
   utgifter: BudgetSide;
   inntekter: BudgetSide;
   spu: SPUData;
+  oljekorrigert: OljekorrigertTotaler;
   metadata: BudgetMetadata;
 }
 
