@@ -218,23 +218,8 @@ function KategoriListe({
                 height: `${Math.max(32, (item.belop / total) * 120)}px`,
               }}
               aria-hidden="true"
-            >
-              {/* DeltaMarker: strek for saldert-nivå inne i baren */}
-              {visEndring && item.endring && item.endring.saldert_forrige > 0 && (
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: `${Math.min(100, (item.endring.saldert_forrige / item.belop) * 100)}%`,
-                    borderTop: "2px solid rgba(255, 255, 255, 0.8)",
-                    pointerEvents: "none",
-                  }}
-                  aria-hidden="true"
-                />
-              )}
-            </div>
+            />
+
             <div className={styles.kategoriInfo}>
               <div className={styles.kategoriNavn}>
                 {item.prefiks && (
