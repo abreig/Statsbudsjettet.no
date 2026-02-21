@@ -13,6 +13,9 @@
         30,
         33
       ],
+      "saldert_belop": 702200317000,
+      "endring_absolut": 41817398000,
+      "endring_prosent": 6.0,
       "farge": "#0C1045"
     },
     {
@@ -36,6 +39,9 @@
         24,
         26
       ],
+      "saldert_belop": 451675091000,
+      "endring_absolut": 18572924000,
+      "endring_prosent": 4.1,
       "farge": "#181C62"
     },
     {
@@ -43,6 +49,9 @@
       "navn": "Kommuner og distrikter",
       "belop": 283721902000,
       "omr_nr": 13,
+      "saldert_belop": 270136043000,
+      "endring_absolut": 13585859000,
+      "endring_prosent": 5.0,
       "farge": "#263080"
     },
     {
@@ -50,6 +59,9 @@
       "navn": "Helse og omsorg",
       "belop": 257365624000,
       "omr_nr": 10,
+      "saldert_belop": 248383015000,
+      "endring_absolut": 8982609000,
+      "endring_prosent": 3.6,
       "farge": "#354A9E"
     },
     {
@@ -57,6 +69,9 @@
       "navn": "Forsvar",
       "belop": 179765304000,
       "omr_nr": 4,
+      "saldert_belop": 107566317000,
+      "endring_absolut": 72198987000,
+      "endring_prosent": 67.1,
       "farge": "#4A65B5"
     },
     {
@@ -64,6 +79,9 @@
       "navn": "Kunnskapsformål",
       "belop": 107226016000,
       "omr_nr": 7,
+      "saldert_belop": 102109868000,
+      "endring_absolut": 5116148000,
+      "endring_prosent": 5.0,
       "farge": "#6580C5"
     },
     {
@@ -71,6 +89,9 @@
       "navn": "Innenlands transport",
       "belop": 96105900000,
       "omr_nr": 21,
+      "saldert_belop": 93615900000,
+      "endring_absolut": 2490000000,
+      "endring_prosent": 2.7,
       "farge": "#839DD5"
     },
     {
@@ -78,6 +99,9 @@
       "navn": "Næring og fiskeri",
       "belop": 26010489000,
       "omr_nr": 17,
+      "saldert_belop": 23301722000,
+      "endring_absolut": 2708767000,
+      "endring_prosent": 11.6,
       "farge": "#A8BAE2"
     }
   ],
@@ -87,6 +111,9 @@
       "navn": "Skatt på inntekt og formue",
       "belop": 507780250000,
       "omr_nr": 25,
+      "saldert_belop": 429843300000,
+      "endring_absolut": 77936950000,
+      "endring_prosent": 18.1,
       "farge": "#004D52"
     },
     {
@@ -94,6 +121,9 @@
       "navn": "Merverdiavgift",
       "belop": 420970000000,
       "omr_nr": 25,
+      "saldert_belop": 409258000000,
+      "endring_absolut": 11712000000,
+      "endring_prosent": 2.9,
       "farge": "#006B73"
     },
     {
@@ -101,6 +131,9 @@
       "navn": "Arbeidsgiveravgift",
       "belop": 283011000000,
       "omr_nr": 25,
+      "saldert_belop": 269420000000,
+      "endring_absolut": 13591000000,
+      "endring_prosent": 5.0,
       "farge": "#008286"
     },
     {
@@ -131,6 +164,9 @@
         29,
         33
       ],
+      "saldert_belop": 269486172000,
+      "endring_absolut": -196303000,
+      "endring_prosent": -0.1,
       "farge": "#2A9D8F"
     },
     {
@@ -138,6 +174,9 @@
       "navn": "Trygdeavgift",
       "belop": 231189440000,
       "omr_nr": 25,
+      "saldert_belop": 197169500000,
+      "endring_absolut": 34019940000,
+      "endring_prosent": 17.3,
       "farge": "#5AB8AD"
     }
   ],

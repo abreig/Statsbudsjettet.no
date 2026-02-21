@@ -3,6 +3,7 @@
 import { useState, forwardRef, useImperativeHandle, useCallback } from "react";
 import dynamic from "next/dynamic";
 import StackedBarChart from "./StackedBarChart";
+import ComparisonToggle from "./ComparisonToggle";
 import ModalOverlay from "@/components/shared/ModalOverlay";
 import { formaterBelop } from "@/components/shared/NumberFormat";
 import type { AggregertBudsjett, KontantstromKilde, Programomraade } from "@/components/data/types/budget";
@@ -26,6 +27,10 @@ export interface BudsjettSeksjonHandle {
 
 const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
   function BudsjettSeksjon({ data, aar, overskrift, forklaringstekst }, ref) {
+    // Sjekk om endringsdata er tilgjengelig
+    const harEndringsdata = data.utgifter_aggregert.some((k) => k.saldert_belop != null);
+
+    const [visEndring, setVisEndring] = useState(harEndringsdata);
     const [drillDown, setDrillDown] = useState<{
       side: "utgift" | "inntekt";
       id: string;
@@ -141,11 +146,17 @@ const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
           </p>
         )}
 
+        {harEndringsdata && (
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "var(--space-4)" }}>
+            <ComparisonToggle aktiv={visEndring} onToggle={setVisEndring} />
+          </div>
+        )}
+
         <StackedBarChart
           utgifter={data.utgifter_aggregert}
           inntekter={data.inntekter_aggregert}
           spu={data.spu}
-          visEndring={false}
+          visEndring={visEndring}
           onSegmentClick={handleSegmentClick}
           onKontantstromClick={handleKontantstromClick}
           aar={aar}
@@ -203,7 +214,7 @@ const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
               ]}
               onNavigate={() => {}}
               onClose={handleClose}
-              visEndring={false}
+              visEndring={visEndring}
               omtale={hentAggregertOmtale(aar, drillDown.id)}
             />
           )}

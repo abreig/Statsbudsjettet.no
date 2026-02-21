@@ -1,10 +1,8 @@
 {
   "budsjettaar": 2025,
   "saldert_kilde": null,
-  "utgifter": {
-    "endringer": []
-  },
-  "inntekter": {
-    "endringer": []
-  }
+  "saldert_aar": null,
+  "har_endringsdata": false,
+  "endring_etikett": null,
+  "statistikk": null
 }

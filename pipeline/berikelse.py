@@ -115,6 +115,28 @@ def beregn_spu(df: pd.DataFrame) -> dict:
     }
 
 
+def _aggreger_endring_for_filter(df_subset: pd.DataFrame) -> dict | None:
+    """Beregner aggregert endringsdata for en filtrert del av dataframen.
+    Brukes for aggregerte kategorier i barplottene."""
+    if "saldert_belop" not in df_subset.columns:
+        return None
+
+    har_saldert = df_subset[df_subset["saldert_belop"].notna()]
+    if len(har_saldert) == 0:
+        return None
+
+    gb_sum = int(df_subset["GB"].sum())
+    saldert_sum = int(har_saldert["saldert_belop"].sum())
+    endring_abs = gb_sum - saldert_sum
+    endring_pst = round(endring_abs / abs(saldert_sum) * 100, 1) if saldert_sum != 0 else None
+
+    return {
+        "saldert_belop": saldert_sum,
+        "endring_absolut": endring_abs,
+        "endring_prosent": endring_pst,
+    }
+
+
 def generer_aggregert_utgifter(df: pd.DataFrame) -> list[dict]:
     """Genererer aggregert utgiftskategorier for stacked barplot.
     Filtrerer «uten olje og gass»: post < 90, ekskl. kap 2800/2440.
@@ -171,15 +193,26 @@ def generer_aggregert_utgifter(df: pd.DataFrame) -> list[dict]:
         utgifter[~utgifter["omr_nr"].isin(kjente_omraader)]["omr_nr"].unique().tolist()
     )
 
+    # Endringsdata per kategori (aggregert fra underliggende poster)
+    har_endring = "saldert_belop" in utgifter.columns
+
+    def _endring(omr_filter):
+        """Beregner endring for et omr-filter."""
+        if not har_endring:
+            return {}
+        subset = utgifter[utgifter["omr_nr"].isin(omr_filter)] if isinstance(omr_filter, set) else utgifter[utgifter["omr_nr"] == omr_filter]
+        e = _aggreger_endring_for_filter(subset)
+        return e if e else {}
+
     kategorier = [
-        {"id": "folketrygden", "navn": "Folketrygden", "belop": folketrygd_belop, "omr_gruppe": [28, 29, 30, 33]},
-        {"id": "kommuner", "navn": "Kommuner og distrikter", "belop": kommuner_belop, "omr_nr": 13},
-        {"id": "helse", "navn": "Helse og omsorg", "belop": helse_belop, "omr_nr": 10},
-        {"id": "kunnskap", "navn": "Kunnskapsformål", "belop": kunnskap_belop, "omr_nr": 7},
-        {"id": "naering", "navn": "Næring og fiskeri", "belop": naering_belop, "omr_nr": 17},
-        {"id": "forsvar", "navn": "Forsvar", "belop": forsvar_belop, "omr_nr": 4},
-        {"id": "transport", "navn": "Innenlands transport", "belop": transport_belop, "omr_nr": 21},
-        {"id": "ovrige_utgifter", "navn": "Øvrige utgifter", "belop": ovrige_belop, "omr_gruppe": ovrige_omr},
+        {"id": "folketrygden", "navn": "Folketrygden", "belop": folketrygd_belop, "omr_gruppe": [28, 29, 30, 33], **_endring(FOLKETRYGD_OMRAADER)},
+        {"id": "kommuner", "navn": "Kommuner og distrikter", "belop": kommuner_belop, "omr_nr": 13, **_endring(13)},
+        {"id": "helse", "navn": "Helse og omsorg", "belop": helse_belop, "omr_nr": 10, **_endring(10)},
+        {"id": "kunnskap", "navn": "Kunnskapsformål", "belop": kunnskap_belop, "omr_nr": 7, **_endring(7)},
+        {"id": "naering", "navn": "Næring og fiskeri", "belop": naering_belop, "omr_nr": 17, **_endring(17)},
+        {"id": "forsvar", "navn": "Forsvar", "belop": forsvar_belop, "omr_nr": 4, **_endring(4)},
+        {"id": "transport", "navn": "Innenlands transport", "belop": transport_belop, "omr_nr": 21, **_endring(21)},
+        {"id": "ovrige_utgifter", "navn": "Øvrige utgifter", "belop": ovrige_belop, "omr_gruppe": ovrige_omr, **_endring(set(ovrige_omr))},
     ]
 
     # Sorter fra størst til minst, tildel farge fra monokromatisk skala
@@ -239,12 +272,40 @@ def generer_aggregert_inntekter(df: pd.DataFrame) -> list[dict]:
         ]["omr_nr"].unique().tolist()
     )
 
+    # Endringsdata per inntektskategori
+    har_endring = "saldert_belop" in inntekter.columns
+
+    def _endring_kap(kap_filter):
+        """Beregner endring for kapittelnummerfilter."""
+        if not har_endring:
+            return {}
+        subset = inntekter[inntekter["kap_nr"].isin(kap_filter)] if isinstance(kap_filter, (set, list)) else inntekter[inntekter["kap_nr"] == kap_filter]
+        e = _aggreger_endring_for_filter(subset)
+        return e if e else {}
+
+    def _endring_post(kap, post):
+        """Beregner endring for en spesifikk kap+post."""
+        if not har_endring:
+            return {}
+        subset = inntekter[(inntekter["kap_nr"] == kap) & (inntekter["post_nr"] == post)]
+        e = _aggreger_endring_for_filter(subset)
+        return e if e else {}
+
+    def _endring_ovrige():
+        """Beregner endring for øvrige inntekter (alt minus kjente)."""
+        if not har_endring:
+            return {}
+        kjente_kap = {5521, 5501, 5700}
+        subset = inntekter[~inntekter["kap_nr"].isin(kjente_kap)]
+        e = _aggreger_endring_for_filter(subset)
+        return e if e else {}
+
     kategorier = [
-        {"id": "skatt_person", "navn": "Skatt på inntekt og formue", "belop": skatt_person_belop, "omr_nr": 25},
-        {"id": "mva", "navn": "Merverdiavgift", "belop": mva_belop, "omr_nr": 25},
-        {"id": "arbeidsgiveravgift", "navn": "Arbeidsgiveravgift", "belop": arb_avg_belop, "omr_nr": 25},
-        {"id": "trygdeavgift", "navn": "Trygdeavgift", "belop": trygd_belop, "omr_nr": 25},
-        {"id": "ovrige_inntekter", "navn": "Øvrige inntekter", "belop": ovrige_belop, "omr_gruppe": ovrige_inn_omr},
+        {"id": "skatt_person", "navn": "Skatt på inntekt og formue", "belop": skatt_person_belop, "omr_nr": 25, **_endring_kap(5501)},
+        {"id": "mva", "navn": "Merverdiavgift", "belop": mva_belop, "omr_nr": 25, **_endring_kap(5521)},
+        {"id": "arbeidsgiveravgift", "navn": "Arbeidsgiveravgift", "belop": arb_avg_belop, "omr_nr": 25, **_endring_post(5700, 72)},
+        {"id": "trygdeavgift", "navn": "Trygdeavgift", "belop": trygd_belop, "omr_nr": 25, **_endring_post(5700, 71)},
+        {"id": "ovrige_inntekter", "navn": "Øvrige inntekter", "belop": ovrige_belop, "omr_gruppe": ovrige_inn_omr, **_endring_ovrige()},
     ]
 
     # Sorter fra størst til minst, tildel farge fra monokromatisk teal-skala

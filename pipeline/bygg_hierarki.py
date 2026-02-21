@@ -30,8 +30,55 @@ def parse_stikkord(stikkord_str: str) -> list[str]:
     return [s.strip() for s in stikkord_str.split(",") if s.strip()]
 
 
+def _har_endringsdata(df: pd.DataFrame) -> bool:
+    """Sjekker om dataframen har endringskolonner fra saldert-kobling."""
+    return "saldert_belop" in df.columns and "er_ny_post" in df.columns
+
+
+def _bygg_endring_post(rad: pd.Series) -> dict | None:
+    """Bygger endring_fra_saldert-objekt for en post."""
+    if pd.isna(rad.get("saldert_belop")):
+        return None
+    return {
+        "belop": int(rad["GB"]),
+        "saldert_forrige": int(rad["saldert_belop"]),
+        "endring_absolut": int(rad["endring_absolut"]) if not pd.isna(rad.get("endring_absolut")) else None,
+        "endring_prosent": float(rad["endring_prosent"]) if not pd.isna(rad.get("endring_prosent")) else None,
+    }
+
+
+def _aggreger_endring(elementer: list[dict], nøkkel_belop: str = "total") -> dict | None:
+    """Aggregerer endringsdata fra underliggende elementer.
+    Beregner prosent fra aggregerte beløp, aldri som gjennomsnitt."""
+    saldert_verdier = []
+    for elem in elementer:
+        endring = elem.get("endring_fra_saldert")
+        if endring is not None:
+            saldert_verdier.append(endring["saldert_forrige"])
+
+    if not saldert_verdier:
+        return None
+
+    belop_sum = sum(e[nøkkel_belop] for e in elementer)
+    saldert_sum = sum(saldert_verdier)
+    endring_abs = belop_sum - saldert_sum
+
+    endring_pst = None
+    if saldert_sum != 0:
+        endring_pst = round(endring_abs / abs(saldert_sum) * 100, 1)
+
+    return {
+        "belop": belop_sum,
+        "saldert_forrige": saldert_sum,
+        "endring_absolut": endring_abs,
+        "endring_prosent": endring_pst,
+    }
+
+
 def bygg_hierarki_for_side(df: pd.DataFrame) -> dict:
-    """Bygger hierarkisk trestruktur for en side (utgift eller inntekt)."""
+    """Bygger hierarkisk trestruktur for en side (utgift eller inntekt).
+    Inkluderer endringsdata fra saldert budsjett hvis tilgjengelig."""
+    har_endring = _har_endringsdata(df)
     omraader = []
 
     for (omr_nr, omr_navn), omr_df in df.groupby(["omr_nr", "omr_navn"]):
@@ -44,40 +91,50 @@ def bygg_hierarki_for_side(df: pd.DataFrame) -> dict:
                 poster = []
 
                 for _, rad in kap_df.iterrows():
-                    poster.append({
+                    post = {
                         "post_nr": int(rad["post_nr"]),
                         "upost_nr": int(rad["upost_nr"]),
                         "navn": rad["post_navn"],
                         "belop": int(rad["GB"]),
                         "postgruppe": klassifiser_postgruppe(int(rad["post_nr"])),
                         "stikkord": parse_stikkord(rad["stikkord"]),
-                        "endring_fra_saldert": None,
-                    })
+                        "endring_fra_saldert": _bygg_endring_post(rad) if har_endring else None,
+                    }
+                    poster.append(post)
 
-                kapitler.append({
+                kap = {
                     "kap_nr": int(kap_nr),
                     "navn": kap_navn,
                     "total": sum(p["belop"] for p in poster),
                     "poster": poster,
-                })
+                    "endring_fra_saldert": _aggreger_endring(poster, "belop") if har_endring else None,
+                }
+                kapitler.append(kap)
 
-            kategorier.append({
+            kat = {
                 "kat_nr": int(kat_nr),
                 "navn": kat_navn,
                 "total": sum(k["total"] for k in kapitler),
                 "kapitler": kapitler,
-            })
+                "endring_fra_saldert": _aggreger_endring(kapitler) if har_endring else None,
+            }
+            kategorier.append(kat)
 
-        omraader.append({
+        omr = {
             "omr_nr": int(omr_nr),
             "navn": omr_navn,
             "total": sum(k["total"] for k in kategorier),
             "kategorier": kategorier,
-        })
+            "endring_fra_saldert": _aggreger_endring(kategorier) if har_endring else None,
+        }
+        omraader.append(omr)
+
+    side_endring = _aggreger_endring(omraader) if har_endring else None
 
     return {
         "total": sum(o["total"] for o in omraader),
         "omraader": omraader,
+        "endring_fra_saldert": side_endring,
     }
 
 

@@ -71,13 +71,17 @@ def eksporter_aggregert(
     return filsti
 
 
-def eksporter_endringer(budsjettaar: int, utmappe: Path) -> Path:
-    """Eksporterer tomt endringsdatasett (placeholder uten saldert-data)."""
+def eksporter_endringer(budsjettaar: int, utmappe: Path,
+                        saldert_aar: int | None = None,
+                        endring_statistikk: dict | None = None) -> Path:
+    """Eksporterer endringsmetadata. Faktiske endringer ligger nå i full og aggregert JSON."""
     data = {
         "budsjettaar": budsjettaar,
-        "saldert_kilde": None,
-        "utgifter": {"endringer": []},
-        "inntekter": {"endringer": []},
+        "saldert_kilde": f"Saldert budsjett {saldert_aar}" if saldert_aar else None,
+        "saldert_aar": saldert_aar,
+        "har_endringsdata": saldert_aar is not None,
+        "endring_etikett": f"fra saldert budsjett {saldert_aar}" if saldert_aar else None,
+        "statistikk": endring_statistikk,
     }
 
     filsti = utmappe / "gul_bok_endringer.json"

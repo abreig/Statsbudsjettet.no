@@ -8,8 +8,10 @@ import type {
   Post,
   HierarkiNode,
 } from "@/components/data/types/budget";
+import type { EndringsData } from "@/components/data/types/budget";
 import type { OmrOmtale } from "@/lib/mock-omtaler";
 import { formaterBelop } from "@/components/shared/NumberFormat";
+import ChangeIndicator from "./ChangeIndicator";
 import styles from "./DrillDownPanel.module.css";
 
 interface DrillDownPanelProps {
@@ -41,6 +43,7 @@ export default function DrillDownPanel({
   data: initialData,
   hierarkiSti: initialSti,
   onClose,
+  visEndring,
   omtale,
 }: DrillDownPanelProps) {
   // Intern state for dypere navigering
@@ -97,7 +100,17 @@ export default function DrillDownPanel({
             {data.navn}
           </h3>
           {total > 0 && (
-            <div className={styles.total}>{formaterBelop(total)}</div>
+            <div className={styles.total}>
+              {formaterBelop(total)}
+              {visEndring && "endring_fra_saldert" in data && (data as { endring_fra_saldert: EndringsData | null }).endring_fra_saldert && (
+                <span style={{ marginLeft: "var(--space-2)" }}>
+                  <ChangeIndicator
+                    endring_absolut={(data as { endring_fra_saldert: EndringsData }).endring_fra_saldert.endring_absolut}
+                    endring_prosent={(data as { endring_fra_saldert: EndringsData }).endring_fra_saldert.endring_prosent}
+                  />
+                </span>
+              )}
+            </div>
           )}
         </div>
 
@@ -124,8 +137,10 @@ export default function DrillDownPanel({
             navn: k.navn,
             belop: k.total,
             data: k,
+            endring: k.endring_fra_saldert,
           }))}
           total={data.total}
+          visEndring={visEndring}
           onNaviger={(item) =>
             navigerDypere(item.data as Programkategori, {
               nivaa: 3,
@@ -144,8 +159,10 @@ export default function DrillDownPanel({
             navn: k.navn,
             belop: k.total,
             data: k,
+            endring: k.endring_fra_saldert,
           }))}
           total={data.total}
+          visEndring={visEndring}
           onNaviger={(item) =>
             navigerDypere(item.data as Kapittel, {
               nivaa: 4,
@@ -157,7 +174,7 @@ export default function DrillDownPanel({
       )}
 
       {erKapittel(data) && (
-        <PostListe poster={data.poster} />
+        <PostListe poster={data.poster} visEndring={visEndring} />
       )}
     </div>
   );
@@ -169,15 +186,18 @@ interface KategoriItemData {
   navn: string;
   belop: number;
   data: Programkategori | Kapittel;
+  endring?: EndringsData | null;
 }
 
 function KategoriListe({
   items,
   total,
+  visEndring,
   onNaviger,
 }: {
   items: KategoriItemData[];
   total: number;
+  visEndring: boolean;
   onNaviger: (item: KategoriItemData) => void;
 }) {
   const sortert = [...items].sort((a, b) => b.belop - a.belop);
@@ -198,7 +218,23 @@ function KategoriListe({
                 height: `${Math.max(32, (item.belop / total) * 120)}px`,
               }}
               aria-hidden="true"
-            />
+            >
+              {/* DeltaMarker: strek for saldert-nivå inne i baren */}
+              {visEndring && item.endring && item.endring.saldert_forrige > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: `${Math.min(100, (item.endring.saldert_forrige / item.belop) * 100)}%`,
+                    borderTop: "2px solid rgba(255, 255, 255, 0.8)",
+                    pointerEvents: "none",
+                  }}
+                  aria-hidden="true"
+                />
+              )}
+            </div>
             <div className={styles.kategoriInfo}>
               <div className={styles.kategoriNavn}>
                 {item.prefiks && (
@@ -208,6 +244,15 @@ function KategoriListe({
               </div>
               <div className={styles.kategoriBelop}>
                 {formaterBelop(item.belop)}
+                {visEndring && item.endring && (
+                  <span style={{ marginLeft: "var(--space-1)" }}>
+                    <ChangeIndicator
+                      endring_absolut={item.endring.endring_absolut}
+                      endring_prosent={item.endring.endring_prosent}
+                      compact
+                    />
+                  </span>
+                )}
               </div>
             </div>
             <div className={styles.kategoriAndel}>
@@ -277,8 +322,10 @@ function MiniBarplot({ data }: { data: { etikett: string; verdi: number }[] }) {
   );
 }
 
-function PostListe({ poster }: { poster: Post[] }) {
+function PostListe({ poster, visEndring }: { poster: Post[]; visEndring: boolean }) {
   const sortert = [...poster].sort((a, b) => b.belop - a.belop);
+  const harEndring = visEndring && poster.some((p) => p.endring_fra_saldert !== null);
+  const harNyePost = poster.some((p) => p.endring_fra_saldert === null && visEndring);
 
   return (
     <div className={styles.postTabell}>
@@ -289,24 +336,55 @@ function PostListe({ poster }: { poster: Post[] }) {
             <th scope="col" style={{ textAlign: "left", padding: "var(--space-2)", fontWeight: "var(--vekt-semibold)" }}>Post</th>
             <th scope="col" style={{ textAlign: "left", padding: "var(--space-2)", fontWeight: "var(--vekt-semibold)" }}>Navn</th>
             <th scope="col" style={{ textAlign: "right", padding: "var(--space-2)", fontWeight: "var(--vekt-semibold)" }}>Beløp</th>
+            {harEndring && (
+              <>
+                <th scope="col" style={{ textAlign: "right", padding: "var(--space-2)", fontWeight: "var(--vekt-semibold)" }}>Saldert</th>
+                <th scope="col" style={{ textAlign: "right", padding: "var(--space-2)", fontWeight: "var(--vekt-semibold)" }}>Endring</th>
+              </>
+            )}
           </tr>
         </thead>
         <tbody>
-          {sortert.map((post) => (
-            <tr
-              key={`${post.post_nr}-${post.upost_nr}`}
-              style={{ borderBottom: "1px solid var(--reg-lysgraa)" }}
-            >
-              <td style={{ padding: "var(--space-2)", fontFamily: "var(--font-tall)" }}>
-                {post.post_nr}
-                {post.upost_nr > 0 ? `.${post.upost_nr}` : ""}
-              </td>
-              <td style={{ padding: "var(--space-2)" }}>{post.navn}</td>
-              <td style={{ padding: "var(--space-2)", textAlign: "right", fontFamily: "var(--font-tall)" }}>
-                {formaterBelop(post.belop)}
-              </td>
-            </tr>
-          ))}
+          {sortert.map((post) => {
+            const endring = post.endring_fra_saldert;
+            const erNyPost = visEndring && endring === null && harNyePost;
+            return (
+              <tr
+                key={`${post.post_nr}-${post.upost_nr}`}
+                style={{
+                  borderBottom: "1px solid var(--reg-lysgraa)",
+                  backgroundColor: erNyPost ? "rgba(255, 223, 79, 0.1)" : undefined,
+                }}
+              >
+                <td style={{ padding: "var(--space-2)", fontFamily: "var(--font-tall)" }}>
+                  {post.post_nr}
+                  {post.upost_nr > 0 ? `.${post.upost_nr}` : ""}
+                </td>
+                <td style={{ padding: "var(--space-2)" }}>{post.navn}</td>
+                <td style={{ padding: "var(--space-2)", textAlign: "right", fontFamily: "var(--font-tall)" }}>
+                  {formaterBelop(post.belop)}
+                </td>
+                {harEndring && (
+                  <>
+                    <td style={{ padding: "var(--space-2)", textAlign: "right", fontFamily: "var(--font-tall)", color: "var(--tekst-sekundaer)" }}>
+                      {endring ? formaterBelop(endring.saldert_forrige) : "—"}
+                    </td>
+                    <td style={{ padding: "var(--space-2)", textAlign: "right" }}>
+                      {erNyPost ? (
+                        <ChangeIndicator endring_absolut={null} endring_prosent={null} er_ny_post compact />
+                      ) : endring ? (
+                        <ChangeIndicator
+                          endring_absolut={endring.endring_absolut}
+                          endring_prosent={endring.endring_prosent}
+                          compact
+                        />
+                      ) : null}
+                    </td>
+                  </>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

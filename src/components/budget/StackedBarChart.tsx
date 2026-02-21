@@ -67,6 +67,9 @@ interface SegmentData {
   rw: number;
   rh: number;
   midY: number;
+  saldert_belop?: number | null;
+  endring_absolut?: number | null;
+  endring_prosent?: number | null;
 }
 
 interface TooltipInfo {
@@ -122,6 +125,7 @@ export default function StackedBarChart({
   utgifter,
   inntekter,
   spu,
+  visEndring,
   onSegmentClick,
   onKontantstromClick,
   totalUtgifter,
@@ -173,7 +177,10 @@ export default function StackedBarChart({
     return sorted.map((d) => {
       const h = d.belop * scale;
       y -= h;
-      return { ...d, rx: UTGIFT_X, ry: y, rw: BAR_W, rh: h, midY: y + h / 2 };
+      return {
+        ...d, rx: UTGIFT_X, ry: y, rw: BAR_W, rh: h, midY: y + h / 2,
+        saldert_belop: d.saldert_belop, endring_absolut: d.endring_absolut, endring_prosent: d.endring_prosent,
+      };
     });
   }, [utgifter, scale]);
 
@@ -184,9 +191,17 @@ export default function StackedBarChart({
     return sorted.map((d) => {
       const h = d.belop * scale;
       y -= h;
-      return { ...d, rx: INNTEKT_X, ry: y, rw: BAR_W, rh: h, midY: y + h / 2 };
+      return {
+        ...d, rx: INNTEKT_X, ry: y, rw: BAR_W, rh: h, midY: y + h / 2,
+        saldert_belop: d.saldert_belop, endring_absolut: d.endring_absolut, endring_prosent: d.endring_prosent,
+      };
     });
   }, [inntekter, scale]);
+
+  // Sjekk om noe endringsdata finnes
+  const harEndringsdata = useMemo(() =>
+    utgifter.some(k => k.saldert_belop != null) || inntekter.some(k => k.saldert_belop != null),
+  [utgifter, inntekter]);
 
   // SPU-bokser — plasser sentrert på fondsuttak-segmentet
   const spuCx = SPU_ZONE_X + Math.max(SPU_BOX_W, KS_BOX_W) / 2;
@@ -261,20 +276,33 @@ export default function StackedBarChart({
           <text x={UTGIFT_X + BAR_W / 2} y={52} textAnchor="middle" fontFamily="Georgia, serif" fontSize={22} fontWeight={700} fill="#0C1045">{formaterMrd(utgTotal)}</text>
           <text x={UTGIFT_X + BAR_W / 2} y={68} textAnchor="middle" fontSize={10} fill="#aaa">mrd. kr</text>
 
-          {uSegs.map((s) => (
-            <g key={s.id} tabIndex={0} role="button" aria-label={`${s.navn}: ${formaterBelop(s.belop)}`}
-              onClick={() => onSegmentClick("utgift", s.id)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSegmentClick("utgift", s.id); } }}
-              style={{ cursor: "pointer", opacity: erAnimert ? (dim("utgift", s.id) ? 0.15 : 1) : 0, transition: "opacity 0.3s ease" }}
-            >
-              <rect x={s.rx} y={s.ry} width={s.rw} height={s.rh} fill={s.farge} rx={1}
-                onMouseEnter={(e) => show(e, s.id, "utgift", s.navn, `${formaterMrd(s.belop)} mrd. kr`, `${((s.belop / utgTotal) * 100).toFixed(1)} % av totale utgifter`, s.farge)}
-                onMouseMove={move} onMouseLeave={hide} />
-              {s.ry > BAR_TOP + 2 && <line x1={s.rx} y1={s.ry} x2={s.rx + s.rw} y2={s.ry} stroke="#fff" strokeWidth={1} pointerEvents="none" />}
-              {s.rh > 28 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? -3 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 12 : 10} fontWeight={500} fill={tekstFarge(s.farge)} pointerEvents="none" opacity={0.95}>{s.rh > 50 ? s.navn : ""}</text>}
-              {s.rh > 22 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? 13 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 13 : 10} fontWeight={700} fill={tekstFarge(s.farge)} pointerEvents="none">{formaterMrd(s.belop)}</text>}
-            </g>
-          ))}
+          {uSegs.map((s) => {
+            const endringDesc = visEndring && harEndringsdata && s.endring_prosent != null
+              ? `Endring fra saldert: ${s.endring_prosent > 0 ? "+" : ""}${s.endring_prosent.toFixed(1)} %`
+              : undefined;
+            const saldertH = (visEndring && harEndringsdata && s.saldert_belop != null && s.saldert_belop > 0)
+              ? s.saldert_belop * scale : null;
+            const deltaY = saldertH != null ? (s.ry + s.rh) - saldertH : null;
+            return (
+              <g key={s.id} tabIndex={0} role="button" aria-label={`${s.navn}: ${formaterBelop(s.belop)}`}
+                onClick={() => onSegmentClick("utgift", s.id)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSegmentClick("utgift", s.id); } }}
+                style={{ cursor: "pointer", opacity: erAnimert ? (dim("utgift", s.id) ? 0.15 : 1) : 0, transition: "opacity 0.3s ease" }}
+              >
+                <rect x={s.rx} y={s.ry} width={s.rw} height={s.rh} fill={s.farge} rx={1}
+                  onMouseEnter={(e) => show(e, s.id, "utgift", s.navn, `${formaterMrd(s.belop)} mrd. kr`, endringDesc || `${((s.belop / utgTotal) * 100).toFixed(1)} % av totale utgifter`, s.farge)}
+                  onMouseMove={move} onMouseLeave={hide} />
+                {s.ry > BAR_TOP + 2 && <line x1={s.rx} y1={s.ry} x2={s.rx + s.rw} y2={s.ry} stroke="#fff" strokeWidth={1} pointerEvents="none" />}
+                {/* DeltaMarker: saldert-nivå som stiplet hvit strek */}
+                {deltaY != null && deltaY >= s.ry && deltaY <= s.ry + s.rh && (
+                  <line x1={s.rx + 4} y1={deltaY} x2={s.rx + s.rw - 4} y2={deltaY}
+                    stroke="rgba(255,255,255,0.85)" strokeWidth={1.5} strokeDasharray="4,3" pointerEvents="none" />
+                )}
+                {s.rh > 28 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? -3 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 12 : 10} fontWeight={500} fill={tekstFarge(s.farge)} pointerEvents="none" opacity={0.95}>{s.rh > 50 ? s.navn : ""}</text>}
+                {s.rh > 22 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? 13 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 13 : 10} fontWeight={700} fill={tekstFarge(s.farge)} pointerEvents="none">{formaterMrd(s.belop)}</text>}
+              </g>
+            );
+          })}
 
           {/* INNTEKTER */}
           <text x={INNTEKT_X + BAR_W / 2} y={28} textAnchor="middle" fontSize={11} fontWeight={600} fill="#888" letterSpacing="0.12em">INNTEKTER</text>
@@ -282,20 +310,33 @@ export default function StackedBarChart({
           <text x={INNTEKT_X + BAR_W / 2} y={68} textAnchor="middle" fontSize={10} fill="#aaa">mrd. kr</text>
 
           {/* Ordinære inntektssegmenter */}
-          {iSegs.map((s) => (
-            <g key={s.id} tabIndex={0} role="button" aria-label={`${s.navn}: ${formaterBelop(s.belop)}`}
-              onClick={() => onSegmentClick("inntekt", s.id)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSegmentClick("inntekt", s.id); } }}
-              style={{ cursor: "pointer", opacity: erAnimert ? (dim("inntekt", s.id) ? 0.15 : 1) : 0, transition: "opacity 0.3s ease" }}
-            >
-              <rect x={s.rx} y={s.ry} width={s.rw} height={s.rh} fill={s.farge} rx={1}
-                onMouseEnter={(e) => show(e, s.id, "inntekt", s.navn, `${formaterMrd(s.belop)} mrd. kr`, `${((s.belop / innKatSum) * 100).toFixed(1)} % av ordinære inntekter`, s.farge)}
-                onMouseMove={move} onMouseLeave={hide} />
-              {s.ry > ordTopY + 2 && <line x1={s.rx} y1={s.ry} x2={s.rx + s.rw} y2={s.ry} stroke="#fff" strokeWidth={1} pointerEvents="none" />}
-              {s.rh > 28 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? -3 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 12 : 10} fontWeight={500} fill={tekstFarge(s.farge)} pointerEvents="none" opacity={0.95}>{s.rh > 50 ? s.navn : ""}</text>}
-              {s.rh > 22 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? 13 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 13 : 10} fontWeight={700} fill={tekstFarge(s.farge)} pointerEvents="none">{formaterMrd(s.belop)}</text>}
-            </g>
-          ))}
+          {iSegs.map((s) => {
+            const endringDesc = visEndring && harEndringsdata && s.endring_prosent != null
+              ? `Endring fra saldert: ${s.endring_prosent > 0 ? "+" : ""}${s.endring_prosent.toFixed(1)} %`
+              : undefined;
+            const saldertH = (visEndring && harEndringsdata && s.saldert_belop != null && s.saldert_belop > 0)
+              ? s.saldert_belop * scale : null;
+            const deltaY = saldertH != null ? (s.ry + s.rh) - saldertH : null;
+            return (
+              <g key={s.id} tabIndex={0} role="button" aria-label={`${s.navn}: ${formaterBelop(s.belop)}`}
+                onClick={() => onSegmentClick("inntekt", s.id)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSegmentClick("inntekt", s.id); } }}
+                style={{ cursor: "pointer", opacity: erAnimert ? (dim("inntekt", s.id) ? 0.15 : 1) : 0, transition: "opacity 0.3s ease" }}
+              >
+                <rect x={s.rx} y={s.ry} width={s.rw} height={s.rh} fill={s.farge} rx={1}
+                  onMouseEnter={(e) => show(e, s.id, "inntekt", s.navn, `${formaterMrd(s.belop)} mrd. kr`, endringDesc || `${((s.belop / innKatSum) * 100).toFixed(1)} % av ordinære inntekter`, s.farge)}
+                  onMouseMove={move} onMouseLeave={hide} />
+                {s.ry > ordTopY + 2 && <line x1={s.rx} y1={s.ry} x2={s.rx + s.rw} y2={s.ry} stroke="#fff" strokeWidth={1} pointerEvents="none" />}
+                {/* DeltaMarker: saldert-nivå */}
+                {deltaY != null && deltaY >= s.ry && deltaY <= s.ry + s.rh && (
+                  <line x1={s.rx + 4} y1={deltaY} x2={s.rx + s.rw - 4} y2={deltaY}
+                    stroke="rgba(255,255,255,0.85)" strokeWidth={1.5} strokeDasharray="4,3" pointerEvents="none" />
+                )}
+                {s.rh > 28 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? -3 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 12 : 10} fontWeight={500} fill={tekstFarge(s.farge)} pointerEvents="none" opacity={0.95}>{s.rh > 50 ? s.navn : ""}</text>}
+                {s.rh > 22 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? 13 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 13 : 10} fontWeight={700} fill={tekstFarge(s.farge)} pointerEvents="none">{formaterMrd(s.belop)}</text>}
+              </g>
+            );
+          })}
 
           {/* Fondsuttak-segment (gul, øverst på inntektssøylen) */}
           <g style={{ cursor: "pointer", opacity: erAnimert ? (dim("inntekt", "fondsuttak") ? 0.15 : 1) : 0, transition: "opacity 0.3s ease" }}>
@@ -366,9 +407,13 @@ export default function StackedBarChart({
           { bg: "linear-gradient(180deg, #004D52, #5AB8AD)", label: "Ordinære inntekter (teal-skala)" },
           { bg: `repeating-linear-gradient(45deg, ${FOND_GUL}, ${FOND_GUL} 2px, ${FOND_GUL_LIGHT} 2px, ${FOND_GUL_LIGHT} 4px)`, label: "Uttak fra SPU" },
           { bg: SPU_BLA, label: "SPU / petroleumsinntekter" },
+          ...(visEndring && harEndringsdata ? [{
+            bg: "repeating-linear-gradient(90deg, rgba(255,255,255,0.85) 0px, rgba(255,255,255,0.85) 4px, transparent 4px, transparent 7px)",
+            label: "Saldert nivå",
+          }] : []),
         ].map((item) => (
           <div key={item.label} className={styles.legendItem}>
-            <div className={styles.legendSwatch} style={{ background: item.bg }} />
+            <div className={styles.legendSwatch} style={{ background: item.bg, border: item.label === "Saldert nivå" ? "1px solid #999" : undefined }} />
             {item.label}
           </div>
         ))}

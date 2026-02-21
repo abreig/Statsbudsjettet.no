@@ -6,7 +6,7 @@ import Footer from "@/components/layout/Footer";
 import PageContainer from "@/components/layout/PageContainer";
 import ModulRendrer from "@/components/shared/ModulRendrer";
 import { hentMockCMSData } from "@/lib/mock-cms";
-import type { AggregertBudsjett, BudgetYear } from "@/components/data/types/budget";
+import type { AggregertBudsjett, BudgetYear, EndringsMetadata } from "@/components/data/types/budget";
 
 interface BudsjettaarSideProps {
   params: Promise<{ aar: string }>;
@@ -53,13 +53,24 @@ async function hentFullData(aar: string): Promise<BudgetYear | null> {
   }
 }
 
+async function hentEndringsdata(aar: string): Promise<EndringsMetadata | null> {
+  try {
+    const filsti = path.join(process.cwd(), "data", aar, "gul_bok_endringer.json");
+    const innhold = await fs.readFile(filsti, "utf-8");
+    return JSON.parse(innhold) as EndringsMetadata;
+  } catch {
+    return null;
+  }
+}
+
 export default async function BudsjettaarSide({ params }: BudsjettaarSideProps) {
   const { aar } = await params;
   const aarNum = parseInt(aar, 10);
 
-  const [aggregertData, fullData] = await Promise.all([
+  const [aggregertData, fullData, endringsdata] = await Promise.all([
     hentAggregertData(aar),
     hentFullData(aar),
+    hentEndringsdata(aar),
   ]);
 
   const cmsData = hentMockCMSData(aarNum);
@@ -76,6 +87,7 @@ export default async function BudsjettaarSide({ params }: BudsjettaarSideProps) 
               aggregertData={aggregertData}
               fullData={fullData}
               temaer={cmsData.temaer}
+              endringsdata={endringsdata}
             />
           ) : (
             <section style={{ padding: "var(--space-10) 0", textAlign: "center" }}>
