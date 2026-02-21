@@ -104,12 +104,17 @@ export interface BudgetMetadata {
 }
 
 // ---------------------------------------------------------------------------
-// Oljekorrigerte totaler (ekskl. SPU-overføringer og petroleumsinntekter)
+// Oljekorrigerte totaler — «uten olje og gass» (post < 90, ekskl. petroleumskapitler).
+// Se OLJEKORRIGERT.md for fullstendig begrunnelse.
 // ---------------------------------------------------------------------------
 
 export interface OljekorrigertTotaler {
   utgifter_total: number;
   inntekter_total: number;
+  /** Strukturelt oljekorrigert underskudd (manuelt innlagt, fra Nasjonalbudsjettet) */
+  strukturelt_underskudd?: number;
+  /** Uttaksprosent fra SPU iht. handlingsregelen (manuelt innlagt) */
+  uttaksprosent?: number;
 }
 
 // ---------------------------------------------------------------------------

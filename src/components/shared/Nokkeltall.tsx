@@ -39,7 +39,9 @@ export default function Nokkeltall({ konfigurasjon, budsjettdata }: NokkeltallPr
           if (!visningsverdi && tall.datareferanse && budsjettdata) {
             const verdi = opplosDatareferanse(tall.datareferanse, budsjettdata);
             if (verdi !== null) {
-              visningsverdi = formaterBelop(verdi);
+              visningsverdi = tall.datareferanse.includes("prosent")
+                ? `${verdi.toFixed(1).replace(".", ",")} %`
+                : formaterBelop(verdi);
             }
           }
 
@@ -63,8 +65,8 @@ export default function Nokkeltall({ konfigurasjon, budsjettdata }: NokkeltallPr
 /** Standard nøkkeltall dersom CMS ikke angir egne */
 function hentStandardNokkeltall(): NokkeltallTall[] {
   return [
-    { etikett: "Statens utgifter", datareferanse: "oljekorrigert.utgifter_total" },
-    { etikett: "Ordinære inntekter", datareferanse: "oljekorrigert.inntekter_total" },
+    { etikett: "Utgifter uten olje og gass", datareferanse: "oljekorrigert.utgifter_total" },
+    { etikett: "Inntekter uten olje og gass", datareferanse: "oljekorrigert.inntekter_total" },
     { etikett: "Oljekorrigert underskudd", datareferanse: "spu.fondsuttak" },
     { etikett: "Netto kontantstrøm petroleum", datareferanse: "spu.netto_kontantstrom" },
     { etikett: "Netto overføring til SPU", datareferanse: "spu.netto_overfoering_til_spu" },

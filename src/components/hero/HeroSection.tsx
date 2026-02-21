@@ -45,10 +45,14 @@ export default function HeroSection({
             <div key={tall.etikett} className={styles.nokkeltallItem} role="listitem">
               <div className={styles.nokkeltallVerdi}>
                 {numeriskVerdi !== null ? (
-                  <CountUp
-                    sluttverdi={numeriskVerdi}
-                    formaterer={formaterBelop}
-                  />
+                  tall.datareferanse?.includes("prosent") ? (
+                    `${numeriskVerdi.toFixed(1).replace(".", ",")} %`
+                  ) : (
+                    <CountUp
+                      sluttverdi={numeriskVerdi}
+                      formaterer={formaterBelop}
+                    />
+                  )
                 ) : (
                   tall.verdi ?? "—"
                 )}

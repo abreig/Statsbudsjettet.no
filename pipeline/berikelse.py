@@ -3,23 +3,24 @@ Steg 4: Berikelse — SPU-beregninger og aggregert datasett.
 Isolerer SPU-poster, beregner netto overføring, og genererer
 det aggregerte datasettet for landingssiden.
 
-Oppdatert iht. DESIGN_OPPDATERING.md:
-- Utgifter EKSKLUDERER SPU (omr 34)
-- Inntekter EKSKLUDERER kap. 5800 (overføring fra fondet)
-- Fondsuttaket beregnes som utgifter_total - ordinære_inntekter_total
+Oljekorrigert logikk (se OLJEKORRIGERT.md):
+- Filtrerer bort finanstransaksjoner (post >= 90)
+- Utgifter ekskluderer kap 2800 (SPU) og kap 2440 (SDØE)
+- Inntekter ekskluderer kap 5800, 5507, 5508, 5509, 5440, 5685
+- Fondsuttaket = oljekorrigert underskudd = utgifter_uten_olje - inntekter_uten_olje
 - Monokromatiske fargeskalaer (marine for utgifter, teal for inntekter)
 """
 
 import pandas as pd
 
-# Monokromatisk marine-skala for utgifter (DESIGN_OPPDATERING.md 2.1)
+# Monokromatisk marine-skala for utgifter
 # Sortert mørkest → lysest (tildeles etter beløpsstørrelse)
 UTGIFT_FARGESKALA = [
     "#0C1045", "#181C62", "#263080", "#354A9E",
     "#4A65B5", "#6580C5", "#839DD5", "#A8BAE2",
 ]
 
-# Monokromatisk teal-skala for inntekter (DESIGN_OPPDATERING.md 2.1)
+# Monokromatisk teal-skala for inntekter
 INNTEKT_FARGESKALA = [
     "#004D52", "#006B73", "#008286", "#2A9D8F", "#5AB8AD",
 ]
@@ -30,9 +31,20 @@ SPU_BLA = "#2C4F8A"
 # Folketrygdens programområder
 FOLKETRYGD_OMRAADER = {28, 29, 30, 33}
 
-# Petroleumskapitler som ekskluderes fra ordinære inntekter
-# (kanaliseres gjennom SPU-sonen i grafen)
-PETROLEUM_KAP = {5507, 5440, 5685}
+# Petroleumskapitler som ekskluderes fra oljekorrigert budsjett
+# Se OLJEKORRIGERT.md for begrunnelse
+PETRO_KAP_UTGIFT = {2800, 2440}
+PETRO_KAP_INNTEKT = {5800, 5507, 5508, 5509, 5440, 5685}
+
+# Manuelt innlagte tall som ikke kan beregnes fra Gul bok.
+# Strukturelt oljekorrigert underskudd og uttaksprosent publiseres i
+# Nasjonalbudsjettet, ikke i Gul bok. Se OLJEKORRIGERT.md.
+MANUELLE_TALL: dict[int, dict] = {
+    2026: {
+        "strukturelt_underskudd": 579_400_000_000,
+        "uttaksprosent": 3.1,
+    },
+}
 
 
 def beregn_spu(df: pd.DataFrame) -> dict:
@@ -62,8 +74,8 @@ def beregn_spu(df: pd.DataFrame) -> dict:
     fondsuttak = 0
 
     # Kontantstrøm-kilder (petroleumsinntekter)
-    skatt_omr = inntekter[inntekter["omr_nr"] == 25]
-    petskatt = int(skatt_omr[skatt_omr["kap_nr"] == 5507]["GB"].sum())
+    # Petroleumsskatter: kap 5507 + 5508 (CO₂) + 5509 (NOx)
+    petskatt = int(inntekter[inntekter["kap_nr"].isin({5507, 5508, 5509})]["GB"].sum())
 
     # SDFI (kap 5440)
     sdfi = int(inntekter[inntekter["kap_nr"] == 5440]["GB"].sum())
@@ -105,8 +117,13 @@ def beregn_spu(df: pd.DataFrame) -> dict:
 
 def generer_aggregert_utgifter(df: pd.DataFrame) -> list[dict]:
     """Genererer aggregert utgiftskategorier for stacked barplot.
-    EKSKLUDERER SPU-overføringer (omr 34) iht. DESIGN_OPPDATERING.md."""
-    utgifter = df[df["side"] == "utgift"]
+    Filtrerer «uten olje og gass»: post < 90, ekskl. kap 2800/2440.
+    Se OLJEKORRIGERT.md for fullstendig begrunnelse."""
+    utgifter = df[
+        (df["side"] == "utgift") &
+        (df["post_nr"] < 90) &
+        (~df["kap_nr"].isin(PETRO_KAP_UTGIFT))
+    ]
 
     # Folketrygden (omr 28, 29, 30, 33)
     folketrygd_belop = int(
@@ -143,7 +160,7 @@ def generer_aggregert_utgifter(df: pd.DataFrame) -> list[dict]:
         utgifter[utgifter["omr_nr"] == 21]["GB"].sum()
     )
 
-    # Øvrige utgifter (resten, UTEN omr 34/SPU)
+    # Øvrige utgifter (resten — omr 34 er tom etter kap 2800-ekskludering)
     kjente_omraader = FOLKETRYGD_OMRAADER | {34, 13, 10, 7, 17, 4, 21}
     ovrige_belop = int(
         utgifter[~utgifter["omr_nr"].isin(kjente_omraader)]["GB"].sum()
@@ -175,9 +192,13 @@ def generer_aggregert_utgifter(df: pd.DataFrame) -> list[dict]:
 
 def generer_aggregert_inntekter(df: pd.DataFrame) -> list[dict]:
     """Genererer aggregert inntektskategorier for stacked barplot.
-    EKSKLUDERER SPU-overføring (kap 5800) og alle petroleumsinntekter
-    (kap 5507, 5440, 5685) — disse kanaliseres gjennom SPU-sonen."""
-    inntekter = df[df["side"] == "inntekt"]
+    Filtrerer «uten olje og gass»: post < 90, ekskl. petroleumskapitler.
+    Se OLJEKORRIGERT.md for fullstendig begrunnelse."""
+    inntekter = df[
+        (df["side"] == "inntekt") &
+        (df["post_nr"] < 90) &
+        (~df["kap_nr"].isin(PETRO_KAP_INNTEKT))
+    ]
 
     # Skatter og avgifter (omr 25)
     skatt_omr = inntekter[inntekter["omr_nr"] == 25]
@@ -204,20 +225,15 @@ def generer_aggregert_inntekter(df: pd.DataFrame) -> list[dict]:
         skatt_omr[skatt_omr["kap_nr"] == 5501]["GB"].sum()
     )
 
-    # Øvrige inntekter: totalt MINUS kap 5800 MINUS petroleumskapitler MINUS kjente
-    totalt_uten_spu_og_petro = int(
-        inntekter[
-            ~inntekter["kap_nr"].isin({5800} | PETROLEUM_KAP)
-        ]["GB"].sum()
-    )
+    # Øvrige inntekter: totalt minus de kjente kategoriene
+    # (petroleumskapitler og post >= 90 er allerede filtrert bort)
+    totalt = int(inntekter["GB"].sum())
     kjent_sum = mva_belop + arb_avg_belop + trygd_belop + skatt_person_belop
-    ovrige_belop = totalt_uten_spu_og_petro - kjent_sum
+    ovrige_belop = totalt - kjent_sum
 
-    # Beregn omr_gruppe for "Øvrige inntekter" dynamisk (ekskl. omr 25, 34 og petroleum/SPU)
-    ekskluderte_kap = {5800} | PETROLEUM_KAP
+    # Beregn omr_gruppe for "Øvrige inntekter" dynamisk (ekskl. omr 25 og 34)
     ovrige_inn_omr = sorted(
         inntekter[
-            (~inntekter["kap_nr"].isin(ekskluderte_kap)) &
             (inntekter["omr_nr"] != 25) &
             (inntekter["omr_nr"] != 34)
         ]["omr_nr"].unique().tolist()
@@ -237,6 +253,35 @@ def generer_aggregert_inntekter(df: pd.DataFrame) -> list[dict]:
         kat["farge"] = INNTEKT_FARGESKALA[i] if i < len(INNTEKT_FARGESKALA) else INNTEKT_FARGESKALA[-1]
 
     return kategorier
+
+
+def beregn_oljekorrigert(df: pd.DataFrame) -> dict:
+    """Beregner oljekorrigerte totaler (uten olje og gass).
+    Se OLJEKORRIGERT.md for fullstendig begrunnelse."""
+    utg = df[
+        (df["side"] == "utgift") &
+        (df["post_nr"] < 90) &
+        (~df["kap_nr"].isin(PETRO_KAP_UTGIFT))
+    ]
+    inn = df[
+        (df["side"] == "inntekt") &
+        (df["post_nr"] < 90) &
+        (~df["kap_nr"].isin(PETRO_KAP_INNTEKT))
+    ]
+    utgifter_total = int(utg["GB"].sum())
+    inntekter_total = int(inn["GB"].sum())
+    underskudd = utgifter_total - inntekter_total
+
+    return {
+        "utgifter_total": utgifter_total,
+        "inntekter_total": inntekter_total,
+        "underskudd": underskudd,
+    }
+
+
+def hent_manuelle_tall(budsjettaar: int) -> dict:
+    """Henter manuelt innlagte tall for et budsjettår (strukturelt underskudd m.m.)."""
+    return MANUELLE_TALL.get(budsjettaar, {})
 
 
 if __name__ == "__main__":
