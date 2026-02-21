@@ -4,6 +4,7 @@ Kjører alle steg i sekvens: innlesing → hierarki → berikelse → eksport �
 """
 
 import sys
+import shutil
 from pathlib import Path
 
 # Legg til pipeline-mappen i PYTHONPATH
@@ -113,7 +114,15 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
         return False
     else:
         print("  ✓ Alle valideringer bestått.")
-        return True
+
+    # Synkroniser til public/data/ for klientside-tilgang (drill-down)
+    public_mappe = utmappe.parent.parent / "public" / "data" / utmappe.name
+    public_mappe.mkdir(parents=True, exist_ok=True)
+    for json_fil in utmappe.glob("*.json"):
+        shutil.copy2(json_fil, public_mappe / json_fil.name)
+    print(f"  → Synkronisert til {public_mappe}")
+
+    return True
 
 
 if __name__ == "__main__":
