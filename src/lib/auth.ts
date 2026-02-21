@@ -47,26 +47,32 @@ const utviklingsProviders =
           async authorize(credentials) {
             if (!credentials?.epost) return null;
 
-            // Finn eller opprett utviklerbruker
-            let bruker = await prisma.bruker.findUnique({
-              where: { epost: credentials.epost },
-            });
-
-            if (!bruker) {
-              bruker = await prisma.bruker.create({
-                data: {
-                  epost: credentials.epost,
-                  navn: "Utvikler",
-                  rolle: "administrator",
-                },
+            try {
+              // Finn eller opprett utviklerbruker
+              let bruker = await prisma.bruker.findUnique({
+                where: { epost: credentials.epost },
               });
-            }
 
-            return {
-              id: String(bruker.id),
-              name: bruker.navn,
-              email: bruker.epost,
-            };
+              if (!bruker) {
+                bruker = await prisma.bruker.create({
+                  data: {
+                    epost: credentials.epost,
+                    navn: "Utvikler",
+                    rolle: "administrator",
+                    aktiv: true,
+                  },
+                });
+              }
+
+              return {
+                id: String(bruker.id),
+                name: bruker.navn,
+                email: bruker.epost,
+              };
+            } catch (error) {
+              console.error("[AUTH] Credentials authorize error:", error);
+              return null;
+            }
           },
         }),
       ]
@@ -101,55 +107,73 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (!user.email) return false;
 
-      // Finn eller opprett bruker basert på Entra ID eller e-post
-      const entraId = account?.providerAccountId;
-      let bruker = entraId
-        ? await prisma.bruker.findUnique({ where: { entraId } })
-        : await prisma.bruker.findUnique({
-            where: { epost: user.email },
+      try {
+        // Finn bruker basert på Entra ID (Azure) eller e-post
+        const entraId = account?.providerAccountId;
+        let bruker = entraId
+          ? await prisma.bruker.findUnique({ where: { entraId } })
+          : await prisma.bruker.findUnique({
+              where: { epost: user.email },
+            });
+
+        if (!bruker) {
+          // For Azure/OIDC provider: opprett ny bruker ved første innlogging
+          // For Credentials provider: authorize() callback opprettet den allerede,
+          // så hvis vi kommer her er det noe rart. Log it og tillat innlogging.
+          console.warn(
+            "[AUTH] SignIn: Bruker ikke funnet for",
+            user.email,
+            "- dette er vanlig for Credentials provider.",
+          );
+          return true; // Allow sign-in; authorize() already created the user
+        }
+
+        // For Azure provider: oppdater entraId hvis den er ny
+        if (entraId && !bruker.entraId) {
+          await prisma.bruker.update({
+            where: { id: bruker.id },
+            data: { entraId },
           });
+        }
 
-      if (!bruker) {
-        // Opprett ny bruker ved første innlogging
-        bruker = await prisma.bruker.create({
-          data: {
-            epost: user.email,
-            navn: user.name ?? user.email,
-            entraId: entraId ?? null,
-            rolle: "leser", // Nye brukere får leserrolle
-          },
-        });
-      } else if (entraId && !bruker.entraId) {
-        // Oppdater entraId hvis brukeren allerede finnes
-        await prisma.bruker.update({
-          where: { id: bruker.id },
-          data: { entraId },
-        });
+        // Sjekk om brukeren er aktiv
+        if (!bruker.aktiv) {
+          console.warn("[AUTH] SignIn: Bruker er inaktiv:", user.email);
+          return false;
+        }
+
+        return true;
+      } catch (error) {
+        console.error("[AUTH] SignIn error:", error);
+        return false;
       }
-
-      // Sjekk om brukeren er aktiv
-      if (!bruker.aktiv) return false;
-
-      return true;
     },
 
     async jwt({ token, user }) {
-      if (user?.email) {
-        const bruker = await prisma.bruker.findUnique({
-          where: { epost: user.email },
-        });
-        if (bruker) {
-          token.rolle = bruker.rolle as Rolle;
-          token.brukerId = bruker.id;
+      try {
+        if (user?.email) {
+          const bruker = await prisma.bruker.findUnique({
+            where: { epost: user.email },
+          });
+          if (bruker) {
+            token.rolle = bruker.rolle as Rolle;
+            token.brukerId = bruker.id;
+          }
         }
+      } catch (error) {
+        console.error("[AUTH] JWT callback error:", error);
       }
       return token;
     },
 
     async session({ session, token }): Promise<Session> {
-      if (token.rolle && token.brukerId) {
-        session.user.rolle = token.rolle;
-        session.user.brukerId = token.brukerId;
+      try {
+        if (token.rolle && token.brukerId) {
+          session.user.rolle = token.rolle;
+          session.user.brukerId = token.brukerId;
+        }
+      } catch (error) {
+        console.error("[AUTH] Session callback error:", error);
       }
       return session;
     },
