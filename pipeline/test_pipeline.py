@@ -96,6 +96,42 @@ class TestAggregertData:
         assert storrelse < 50_000, f"Aggregert fil er {storrelse} bytes (> 50 KB)"
 
 
+class TestOljekorrigerteTotaler:
+    """Verifiser oljekorrigerte totaler og balanseidentitet."""
+
+    def test_full_har_oljekorrigert(self, full_data):
+        assert "oljekorrigert" in full_data
+        assert full_data["oljekorrigert"]["utgifter_total"] > 0
+        assert full_data["oljekorrigert"]["inntekter_total"] > 0
+
+    def test_oljekorrigert_utgifter_2025(self, full_data):
+        ok_utg = full_data["oljekorrigert"]["utgifter_total"]
+        forventet = 2246.0e9
+        assert abs(ok_utg - forventet) < 0.5e9, f"Oljekorrigert utg: {ok_utg/1e9:.1f} mrd != {forventet/1e9:.1f} mrd"
+
+    def test_barer_balanserer(self, aggregert_data):
+        sum_utg = sum(k["belop"] for k in aggregert_data["utgifter_aggregert"])
+        sum_inn = sum(k["belop"] for k in aggregert_data["inntekter_aggregert"])
+        fondsuttak = aggregert_data["spu"]["fondsuttak"]
+        assert abs(sum_utg - sum_inn - fondsuttak) < 1000, (
+            f"Barer balanserer ikke: utg={sum_utg}, inn={sum_inn}, fond={fondsuttak}"
+        )
+
+    def test_aggregert_total_utgifter_stemmer(self, aggregert_data):
+        sum_utg = sum(k["belop"] for k in aggregert_data["utgifter_aggregert"])
+        assert aggregert_data["total_utgifter"] == sum_utg
+
+    def test_aggregert_total_inntekter_balansert(self, aggregert_data):
+        """total_inntekter skal være lik total_utgifter (balansert budsjett)."""
+        assert aggregert_data["total_inntekter"] == aggregert_data["total_utgifter"]
+
+    def test_netto_overfoering_til_spu(self, full_data):
+        spu = full_data["spu"]
+        assert "netto_overfoering_til_spu" in spu
+        forventet = spu["netto_kontantstrom"] - spu["fondsuttak"]
+        assert spu["netto_overfoering_til_spu"] == forventet
+
+
 class TestMetadata:
     """Verifiser metadata."""
 
@@ -104,3 +140,7 @@ class TestMetadata:
 
     def test_metadata_kilde(self, metadata):
         assert "Gul bok" in metadata["kilde"]
+
+    def test_metadata_har_oljekorrigert_totaler(self, metadata):
+        assert "oljekorrigert_totaler" in metadata
+        assert metadata["oljekorrigert_totaler"]["utgifter"] > 0

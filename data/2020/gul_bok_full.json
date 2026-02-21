@@ -1,6 +1,6 @@
 {
   "budsjettaar": 2020,
-  "publisert": "2026-02-20",
+  "publisert": "2026-02-21",
   "valuta": "NOK",
   "utgifter": {
     "total": 1852351253000,
@@ -22962,7 +22962,12 @@
         "navn": "Equinor-utbytte",
         "belop": 16620000000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": -23815566000
+  },
+  "oljekorrigert": {
+    "utgifter_total": 1566529253000,
+    "inntekter_total": 1235493687000
   },
   "metadata": {
     "kilde": "Gul bok 2020",

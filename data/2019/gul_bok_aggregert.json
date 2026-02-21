@@ -1,7 +1,7 @@
 {
   "budsjettaar": 2019,
-  "total_utgifter": 1852351253000,
-  "total_inntekter": 1775208082000,
+  "total_utgifter": 1566529253000,
+  "total_inntekter": 1566529253000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",
@@ -119,6 +119,7 @@
         "navn": "Equinor-utbytte",
         "belop": 16620000000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": -23815566000
   }
 }

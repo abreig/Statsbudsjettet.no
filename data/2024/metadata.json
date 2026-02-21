@@ -1,11 +1,15 @@
 {
   "budsjettaar": 2024,
-  "publisert": "2026-02-20",
+  "publisert": "2026-02-21",
   "kilde": "Gul bok 2024",
   "saldert_budsjett_forrige": "2023",
   "totaler": {
     "utgifter": 2938608883000,
     "inntekter": 2838891130000
+  },
+  "oljekorrigert_totaler": {
+    "utgifter": 2106443383000,
+    "inntekter": 1652041498000
   },
   "spu": {
     "overfoering_til_fond": 832165500000,
@@ -30,7 +34,8 @@
         "navn": "Equinor-utbytte",
         "belop": 38265400000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": 395963515000
   },
   "antall_poster": {
     "utgifter": null,

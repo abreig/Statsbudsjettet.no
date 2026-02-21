@@ -1,7 +1,7 @@
 {
   "budsjettaar": 2025,
-  "total_utgifter": 2970883012000,
-  "total_inntekter": 2796781829000,
+  "total_utgifter": 2246013912000,
+  "total_inntekter": 2246013912000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",
@@ -124,6 +124,7 @@
         "navn": "Andre petroleumsinnt.",
         "belop": 60501000000
       }
-    ]
+    ],
+    "netto_overfoering_til_spu": 197621271000
   }
 }

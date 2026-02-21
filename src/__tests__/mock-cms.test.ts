@@ -57,11 +57,11 @@ describe("hentMockCMSData", () => {
     expect(tema5?.sitat?.person).toBe("Jonas Gahr Støre");
   });
 
-  it("hero-modul har nøkkeltall med datareferanser", () => {
+  it("hero-modul har nøkkeltall med oljekorrigerte datareferanser", () => {
     const data = hentMockCMSData(2025);
     const heroModul = data?.moduler.find((m) => m.type === "hero");
     const nokkeltall = heroModul?.konfigurasjon.nokkeltall as { datareferanse: string }[];
-    expect(nokkeltall).toHaveLength(3);
-    expect(nokkeltall[0].datareferanse).toBe("utgifter.total");
+    expect(nokkeltall).toHaveLength(4);
+    expect(nokkeltall[0].datareferanse).toBe("oljekorrigert.utgifter_total");
   });
 });

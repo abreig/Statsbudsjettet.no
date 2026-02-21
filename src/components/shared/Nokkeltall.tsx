@@ -63,10 +63,10 @@ export default function Nokkeltall({ konfigurasjon, budsjettdata }: NokkeltallPr
 /** Standard nøkkeltall dersom CMS ikke angir egne */
 function hentStandardNokkeltall(): NokkeltallTall[] {
   return [
-    { etikett: "Totale utgifter", datareferanse: "utgifter.total" },
-    { etikett: "Totale inntekter", datareferanse: "inntekter.total" },
-    { etikett: "Overføring til SPU", datareferanse: "spu.overfoering_til_fond" },
-    { etikett: "Overføring fra SPU", datareferanse: "spu.overfoering_fra_fond" },
-    { etikett: "Netto oljepengebruk", datareferanse: "spu.netto_overfoering" },
+    { etikett: "Statens utgifter", datareferanse: "oljekorrigert.utgifter_total" },
+    { etikett: "Ordinære inntekter", datareferanse: "oljekorrigert.inntekter_total" },
+    { etikett: "Oljekorrigert underskudd", datareferanse: "spu.fondsuttak" },
+    { etikett: "Netto kontantstrøm petroleum", datareferanse: "spu.netto_kontantstrom" },
+    { etikett: "Netto overføring til SPU", datareferanse: "spu.netto_overfoering_til_spu" },
   ];
 }
