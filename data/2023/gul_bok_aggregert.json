@@ -1,5 +1,7 @@
 {
   "budsjettaar": 2023,
+  "total_utgifter": 3358329183000,
+  "total_inntekter": 3354693640000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",

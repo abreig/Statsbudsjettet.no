@@ -1,5 +1,7 @@
 {
   "budsjettaar": 2021,
+  "total_utgifter": 1836011550000,
+  "total_inntekter": 1738218258000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",

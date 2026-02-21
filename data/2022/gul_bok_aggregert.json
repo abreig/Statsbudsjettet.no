@@ -1,5 +1,7 @@
 {
   "budsjettaar": 2022,
+  "total_utgifter": 2062493768000,
+  "total_inntekter": 1968611653000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",

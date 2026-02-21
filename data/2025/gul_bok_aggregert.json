@@ -1,5 +1,7 @@
 {
   "budsjettaar": 2025,
+  "total_utgifter": 2970883012000,
+  "total_inntekter": 2796781829000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",

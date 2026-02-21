@@ -1,5 +1,7 @@
 {
   "budsjettaar": 2020,
+  "total_utgifter": 1852351253000,
+  "total_inntekter": 1775208082000,
   "utgifter_aggregert": [
     {
       "id": "folketrygden",

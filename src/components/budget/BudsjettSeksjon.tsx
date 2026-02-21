@@ -116,6 +116,8 @@ const BudsjettSeksjon = forwardRef<BudsjettSeksjonHandle, BudsjettSeksjonProps>(
           onSegmentClick={handleSegmentClick}
           onKontantstromClick={handleKontantstromClick}
           aar={aar}
+          totalUtgifter={data.total_utgifter}
+          totalInntekter={data.total_inntekter}
         />
 
         {/* Forklaringstekst om fondsmekanismen */}
