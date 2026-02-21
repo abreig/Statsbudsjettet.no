@@ -277,12 +277,12 @@ export default function StackedBarChart({
           <text x={UTGIFT_X + BAR_W / 2} y={68} textAnchor="middle" fontSize={10} fill="#aaa">mrd. kr</text>
 
           {uSegs.map((s) => {
-            const endringDesc = visEndring && harEndringsdata && s.endring_prosent != null
-              ? `Endring fra saldert: ${s.endring_prosent > 0 ? "+" : ""}${s.endring_prosent.toFixed(1)} %`
+            const endringProsentTekst = visEndring && harEndringsdata && s.endring_prosent != null
+              ? `${s.endring_prosent > 0 ? "+" : ""}${s.endring_prosent.toFixed(1).replace(".", ",")} %`
+              : null;
+            const endringDesc = endringProsentTekst
+              ? `Endring fra saldert: ${endringProsentTekst}`
               : undefined;
-            const saldertH = (visEndring && harEndringsdata && s.saldert_belop != null && s.saldert_belop > 0)
-              ? s.saldert_belop * scale : null;
-            const deltaY = saldertH != null ? (s.ry + s.rh) - saldertH : null;
             return (
               <g key={s.id} tabIndex={0} role="button" aria-label={`${s.navn}: ${formaterBelop(s.belop)}`}
                 onClick={() => onSegmentClick("utgift", s.id)}
@@ -293,13 +293,12 @@ export default function StackedBarChart({
                   onMouseEnter={(e) => show(e, s.id, "utgift", s.navn, `${formaterMrd(s.belop)} mrd. kr`, endringDesc || `${((s.belop / utgTotal) * 100).toFixed(1)} % av totale utgifter`, s.farge)}
                   onMouseMove={move} onMouseLeave={hide} />
                 {s.ry > BAR_TOP + 2 && <line x1={s.rx} y1={s.ry} x2={s.rx + s.rw} y2={s.ry} stroke="#fff" strokeWidth={1} pointerEvents="none" />}
-                {/* DeltaMarker: saldert-nivå som stiplet hvit strek */}
-                {deltaY != null && deltaY >= s.ry && deltaY <= s.ry + s.rh && (
-                  <line x1={s.rx + 4} y1={deltaY} x2={s.rx + s.rw - 4} y2={deltaY}
-                    stroke="rgba(255,255,255,0.85)" strokeWidth={1.5} strokeDasharray="4,3" pointerEvents="none" />
-                )}
                 {s.rh > 28 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? -3 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 12 : 10} fontWeight={500} fill={tekstFarge(s.farge)} pointerEvents="none" opacity={0.95}>{s.rh > 50 ? s.navn : ""}</text>}
                 {s.rh > 22 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? 13 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 13 : 10} fontWeight={700} fill={tekstFarge(s.farge)} pointerEvents="none">{formaterMrd(s.belop)}</text>}
+                {/* Endringsprosent som kompakt tekst under beløpet */}
+                {endringProsentTekst && s.rh > 72 && (
+                  <text x={s.rx + s.rw / 2} y={s.midY + 25} textAnchor="middle" fontSize={9} fontWeight={500} fill={tekstFarge(s.farge)} pointerEvents="none" opacity={0.75}>{endringProsentTekst}</text>
+                )}
               </g>
             );
           })}
@@ -311,12 +310,12 @@ export default function StackedBarChart({
 
           {/* Ordinære inntektssegmenter */}
           {iSegs.map((s) => {
-            const endringDesc = visEndring && harEndringsdata && s.endring_prosent != null
-              ? `Endring fra saldert: ${s.endring_prosent > 0 ? "+" : ""}${s.endring_prosent.toFixed(1)} %`
+            const endringProsentTekst = visEndring && harEndringsdata && s.endring_prosent != null
+              ? `${s.endring_prosent > 0 ? "+" : ""}${s.endring_prosent.toFixed(1).replace(".", ",")} %`
+              : null;
+            const endringDesc = endringProsentTekst
+              ? `Endring fra saldert: ${endringProsentTekst}`
               : undefined;
-            const saldertH = (visEndring && harEndringsdata && s.saldert_belop != null && s.saldert_belop > 0)
-              ? s.saldert_belop * scale : null;
-            const deltaY = saldertH != null ? (s.ry + s.rh) - saldertH : null;
             return (
               <g key={s.id} tabIndex={0} role="button" aria-label={`${s.navn}: ${formaterBelop(s.belop)}`}
                 onClick={() => onSegmentClick("inntekt", s.id)}
@@ -327,13 +326,12 @@ export default function StackedBarChart({
                   onMouseEnter={(e) => show(e, s.id, "inntekt", s.navn, `${formaterMrd(s.belop)} mrd. kr`, endringDesc || `${((s.belop / innKatSum) * 100).toFixed(1)} % av ordinære inntekter`, s.farge)}
                   onMouseMove={move} onMouseLeave={hide} />
                 {s.ry > ordTopY + 2 && <line x1={s.rx} y1={s.ry} x2={s.rx + s.rw} y2={s.ry} stroke="#fff" strokeWidth={1} pointerEvents="none" />}
-                {/* DeltaMarker: saldert-nivå */}
-                {deltaY != null && deltaY >= s.ry && deltaY <= s.ry + s.rh && (
-                  <line x1={s.rx + 4} y1={deltaY} x2={s.rx + s.rw - 4} y2={deltaY}
-                    stroke="rgba(255,255,255,0.85)" strokeWidth={1.5} strokeDasharray="4,3" pointerEvents="none" />
-                )}
                 {s.rh > 28 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? -3 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 12 : 10} fontWeight={500} fill={tekstFarge(s.farge)} pointerEvents="none" opacity={0.95}>{s.rh > 50 ? s.navn : ""}</text>}
                 {s.rh > 22 && <text x={s.rx + s.rw / 2} y={s.midY + (s.rh > 50 ? 13 : 4)} textAnchor="middle" fontSize={s.rh > 50 ? 13 : 10} fontWeight={700} fill={tekstFarge(s.farge)} pointerEvents="none">{formaterMrd(s.belop)}</text>}
+                {/* Endringsprosent som kompakt tekst under beløpet */}
+                {endringProsentTekst && s.rh > 72 && (
+                  <text x={s.rx + s.rw / 2} y={s.midY + 25} textAnchor="middle" fontSize={9} fontWeight={500} fill={tekstFarge(s.farge)} pointerEvents="none" opacity={0.75}>{endringProsentTekst}</text>
+                )}
               </g>
             );
           })}
@@ -407,10 +405,6 @@ export default function StackedBarChart({
           { bg: "linear-gradient(180deg, #004D52, #5AB8AD)", label: "Ordinære inntekter (teal-skala)" },
           { bg: `repeating-linear-gradient(45deg, ${FOND_GUL}, ${FOND_GUL} 2px, ${FOND_GUL_LIGHT} 2px, ${FOND_GUL_LIGHT} 4px)`, label: "Uttak fra SPU" },
           { bg: SPU_BLA, label: "SPU / petroleumsinntekter" },
-          ...(visEndring && harEndringsdata ? [{
-            bg: "repeating-linear-gradient(90deg, rgba(255,255,255,0.85) 0px, rgba(255,255,255,0.85) 4px, transparent 4px, transparent 7px)",
-            label: "Saldert nivå",
-          }] : []),
         ].map((item) => (
           <div key={item.label} className={styles.legendItem}>
             <div className={styles.legendSwatch} style={{ background: item.bg, border: item.label === "Saldert nivå" ? "1px solid #999" : undefined }} />
