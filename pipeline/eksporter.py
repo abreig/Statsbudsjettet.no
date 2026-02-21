@@ -9,8 +9,21 @@ from datetime import date
 
 
 def eksporter_full(hierarki: dict, spu: dict, budsjettaar: int, utmappe: Path,
-                   oljekorrigert_utgifter: int = 0, oljekorrigert_inntekter: int = 0) -> Path:
+                   oljekorrigert_utgifter: int = 0, oljekorrigert_inntekter: int = 0,
+                   manuelle_tall: dict | None = None) -> Path:
     """Eksporterer komplett hierarki til gul_bok_full.json."""
+    oljekorrigert = {
+        "utgifter_total": oljekorrigert_utgifter,
+        "inntekter_total": oljekorrigert_inntekter,
+    }
+
+    # Legg til manuelle tall (strukturelt underskudd, uttaksprosent)
+    if manuelle_tall:
+        if "strukturelt_underskudd" in manuelle_tall:
+            oljekorrigert["strukturelt_underskudd"] = manuelle_tall["strukturelt_underskudd"]
+        if "uttaksprosent" in manuelle_tall:
+            oljekorrigert["uttaksprosent"] = manuelle_tall["uttaksprosent"]
+
     data = {
         "budsjettaar": budsjettaar,
         "publisert": date.today().isoformat(),
@@ -18,10 +31,7 @@ def eksporter_full(hierarki: dict, spu: dict, budsjettaar: int, utmappe: Path,
         "utgifter": hierarki["utgifter"],
         "inntekter": hierarki["inntekter"],
         "spu": spu,
-        "oljekorrigert": {
-            "utgifter_total": oljekorrigert_utgifter,
-            "inntekter_total": oljekorrigert_inntekter,
-        },
+        "oljekorrigert": oljekorrigert,
         "metadata": {
             "kilde": f"Gul bok {budsjettaar}",
             "saldert_budsjett_forrige": str(budsjettaar - 1),
@@ -79,8 +89,20 @@ def eksporter_endringer(budsjettaar: int, utmappe: Path) -> Path:
 
 def eksporter_metadata(budsjettaar: int, spu: dict, total_utgifter: int, total_inntekter: int,
                        oljekorrigert_utgifter: int = 0, oljekorrigert_inntekter: int = 0,
+                       manuelle_tall: dict | None = None,
                        utmappe: Path = Path(".")) -> Path:
     """Eksporterer metadata.json."""
+    oljekorrigert_totaler = {
+        "utgifter": oljekorrigert_utgifter,
+        "inntekter": oljekorrigert_inntekter,
+    }
+
+    if manuelle_tall:
+        if "strukturelt_underskudd" in manuelle_tall:
+            oljekorrigert_totaler["strukturelt_underskudd"] = manuelle_tall["strukturelt_underskudd"]
+        if "uttaksprosent" in manuelle_tall:
+            oljekorrigert_totaler["uttaksprosent"] = manuelle_tall["uttaksprosent"]
+
     data = {
         "budsjettaar": budsjettaar,
         "publisert": date.today().isoformat(),
@@ -90,10 +112,7 @@ def eksporter_metadata(budsjettaar: int, spu: dict, total_utgifter: int, total_i
             "utgifter": total_utgifter,
             "inntekter": total_inntekter,
         },
-        "oljekorrigert_totaler": {
-            "utgifter": oljekorrigert_utgifter,
-            "inntekter": oljekorrigert_inntekter,
-        },
+        "oljekorrigert_totaler": oljekorrigert_totaler,
         "spu": spu,
         "antall_poster": {
             "utgifter": None,

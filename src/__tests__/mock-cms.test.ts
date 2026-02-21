@@ -60,8 +60,18 @@ describe("hentMockCMSData", () => {
   it("hero-modul har nøkkeltall med oljekorrigerte datareferanser", () => {
     const data = hentMockCMSData(2025);
     const heroModul = data?.moduler.find((m) => m.type === "hero");
-    const nokkeltall = heroModul?.konfigurasjon.nokkeltall as { datareferanse: string }[];
+    const nokkeltall = heroModul?.konfigurasjon.nokkeltall as { etikett: string; datareferanse: string }[];
     expect(nokkeltall).toHaveLength(4);
     expect(nokkeltall[0].datareferanse).toBe("oljekorrigert.utgifter_total");
+    expect(nokkeltall[0].etikett).toBe("Utgifter uten olje og gass");
+  });
+
+  it("2026 hero har strukturelt underskudd", () => {
+    const data = hentMockCMSData(2026);
+    const heroModul = data?.moduler.find((m) => m.type === "hero");
+    const nokkeltall = heroModul?.konfigurasjon.nokkeltall as { etikett: string; datareferanse: string }[];
+    const strukturelt = nokkeltall.find((n) => n.datareferanse === "oljekorrigert.strukturelt_underskudd");
+    expect(strukturelt).toBeDefined();
+    expect(strukturelt?.etikett).toBe("Strukturelt underskudd");
   });
 });

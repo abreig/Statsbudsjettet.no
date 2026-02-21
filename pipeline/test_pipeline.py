@@ -106,8 +106,23 @@ class TestOljekorrigerteTotaler:
 
     def test_oljekorrigert_utgifter_2025(self, full_data):
         ok_utg = full_data["oljekorrigert"]["utgifter_total"]
-        forventet = 2246.0e9
+        forventet = 1991.2e9
         assert abs(ok_utg - forventet) < 0.5e9, f"Oljekorrigert utg: {ok_utg/1e9:.1f} mrd != {forventet/1e9:.1f} mrd"
+
+    def test_oljekorrigert_inntekter_2025(self, full_data):
+        ok_inn = full_data["oljekorrigert"]["inntekter_total"]
+        forventet = 1577.6e9
+        assert abs(ok_inn - forventet) < 0.5e9, f"Oljekorrigert inn: {ok_inn/1e9:.1f} mrd != {forventet/1e9:.1f} mrd"
+
+    def test_oljekorrigert_underskudd_equals_fondsuttak(self, full_data):
+        """Oljekorrigert underskudd = fondsuttak = overfoering_fra_fond (kap 5800)."""
+        ok_utg = full_data["oljekorrigert"]["utgifter_total"]
+        ok_inn = full_data["oljekorrigert"]["inntekter_total"]
+        underskudd = ok_utg - ok_inn
+        fondsuttak = full_data["spu"]["fondsuttak"]
+        assert abs(underskudd - fondsuttak) < 1000, (
+            f"Underskudd ({underskudd/1e9:.1f}) != fondsuttak ({fondsuttak/1e9:.1f})"
+        )
 
     def test_barer_balanserer(self, aggregert_data):
         sum_utg = sum(k["belop"] for k in aggregert_data["utgifter_aggregert"])

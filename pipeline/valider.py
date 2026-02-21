@@ -6,20 +6,22 @@ Verifiserer totalsummer, hierarkinøkler og strukturell integritet.
 import json
 from pathlib import Path
 
-# Forventede totaler for 2025 (i kroner, med avrundingsmargin)
+# Forventede totaler (i mrd. kr, med avrundingsmargin).
+# Oljekorrigerte tall = «uten olje og gass» (post < 90, ekskl. petroleumskapitler).
+# Se OLJEKORRIGERT.md for fullstendig begrunnelse.
 FORVENTEDE_TOTALER = {
     2025: {
         "utgifter_mrd": 2970.9,
         "inntekter_mrd": 2796.8,
-        "oljekorrigert_utgifter_mrd": 2246.0,
-        "oljekorrigert_inntekter_mrd": 1718.8,
+        "oljekorrigert_utgifter_mrd": 1991.2,
+        "oljekorrigert_inntekter_mrd": 1577.6,
         "margin_mrd": 0.5,
     },
     2026: {
         "utgifter_mrd": 2955.2,
         "inntekter_mrd": 2859.7,
-        "oljekorrigert_utgifter_mrd": 2433.9,
-        "oljekorrigert_inntekter_mrd": 1859.4,
+        "oljekorrigert_utgifter_mrd": 2164.5,
+        "oljekorrigert_inntekter_mrd": 1712.2,
         "margin_mrd": 0.5,
     },
 }

@@ -11,7 +11,10 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from les_gul_bok import les_gul_bok, valider_grunndata
 from bygg_hierarki import bygg_komplett_hierarki
-from berikelse import beregn_spu, generer_aggregert_utgifter, generer_aggregert_inntekter
+from berikelse import (
+    beregn_spu, generer_aggregert_utgifter, generer_aggregert_inntekter,
+    beregn_oljekorrigert, hent_manuelle_tall,
+)
 from eksporter import eksporter_full, eksporter_aggregert, eksporter_endringer, eksporter_metadata
 from valider import valider_json_filer
 
@@ -38,25 +41,36 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
     print(f"  Inntektsområder: {len(hierarki['inntekter']['omraader'])}")
 
     # Steg 4: SPU-beregninger og berikelse
-    print("\nSteg 4: SPU-beregninger og berikelse...")
+    print("\nSteg 4: SPU-beregninger og oljekorrigert budsjett...")
     spu = beregn_spu(df)
     print(f"  Overføring til fond: {spu['overfoering_til_fond'] / 1e9:.1f} mrd. kr")
     print(f"  Overføring fra fond: {spu['overfoering_fra_fond'] / 1e9:.1f} mrd. kr")
     print(f"  Netto: {spu['netto_overfoering'] / 1e9:.1f} mrd. kr")
 
+    # Oljekorrigerte totaler (post < 90, ekskl. petroleumskapitler)
+    oljekorr = beregn_oljekorrigert(df)
+    sum_utg = oljekorr["utgifter_total"]
+    sum_inn = oljekorr["inntekter_total"]
+
+    # Aggregerte kategorier for stacked barplot
     utgifter_agg = generer_aggregert_utgifter(df)
     inntekter_agg = generer_aggregert_inntekter(df)
 
-    # Beregn fondsuttak som balanseringspost (oljekorrigert underskudd)
-    # slik at barene i grafen balanserer: utg_ord = inn_ord + fondsuttak
-    sum_utg = sum(k["belop"] for k in utgifter_agg)
-    sum_inn = sum(k["belop"] for k in inntekter_agg)
-    spu["fondsuttak"] = sum_utg - sum_inn
+    # Fondsuttak = oljekorrigert underskudd (balanseringspost for grafen)
+    spu["fondsuttak"] = oljekorr["underskudd"]
     spu["netto_overfoering_til_spu"] = spu["netto_kontantstrom"] - spu["fondsuttak"]
-    print(f"  Fondsuttak (oljekorrigert underskudd): {spu['fondsuttak'] / 1e9:.1f} mrd. kr")
+
+    print(f"  Utgifter uten olje og gass: {sum_utg / 1e9:.1f} mrd. kr")
+    print(f"  Inntekter uten olje og gass: {sum_inn / 1e9:.1f} mrd. kr")
+    print(f"  Oljekorrigert underskudd (fondsuttak): {spu['fondsuttak'] / 1e9:.1f} mrd. kr")
     print(f"  Netto overføring til SPU: {spu['netto_overfoering_til_spu'] / 1e9:.1f} mrd. kr")
-    print(f"  Oljekorrigerte utgifter: {sum_utg / 1e9:.1f} mrd. kr")
-    print(f"  Ordinære inntekter: {sum_inn / 1e9:.1f} mrd. kr")
+
+    # Manuelt innlagte tall (strukturelt underskudd m.m.)
+    manuelle = hent_manuelle_tall(budsjettaar)
+    if manuelle:
+        print(f"  Strukturelt underskudd: {manuelle.get('strukturelt_underskudd', 0) / 1e9:.1f} mrd. kr (manuelt)")
+        if "uttaksprosent" in manuelle:
+            print(f"  Uttaksprosent: {manuelle['uttaksprosent']:.1f} % (manuelt)")
 
     print(f"  Aggregerte utgiftskategorier: {len(utgifter_agg)}")
     print(f"  Aggregerte inntektskategorier: {len(inntekter_agg)}")
@@ -67,7 +81,8 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
 
     f1 = eksporter_full(hierarki, spu, budsjettaar, utmappe,
                         oljekorrigert_utgifter=sum_utg,
-                        oljekorrigert_inntekter=sum_inn)
+                        oljekorrigert_inntekter=sum_inn,
+                        manuelle_tall=manuelle)
     print(f"  → {f1} ({f1.stat().st_size / 1024:.1f} KB)")
 
     f2 = eksporter_aggregert(utgifter_agg, inntekter_agg, spu, budsjettaar, utmappe)
@@ -82,6 +97,7 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
         hierarki["inntekter"]["total"],
         oljekorrigert_utgifter=sum_utg,
         oljekorrigert_inntekter=sum_inn,
+        manuelle_tall=manuelle,
         utmappe=utmappe,
     )
     print(f"  → {f4} ({f4.stat().st_size / 1024:.1f} KB)")
