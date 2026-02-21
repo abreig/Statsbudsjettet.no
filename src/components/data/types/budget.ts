@@ -17,8 +17,8 @@ export type Postgruppe =
 export interface EndringsData {
   belop: number;
   saldert_forrige: number;
-  endring_absolut: number;
-  endring_prosent: number;
+  endring_absolut: number | null;
+  endring_prosent: number | null;
 }
 
 export interface Post {
@@ -40,6 +40,7 @@ export interface Kapittel {
   navn: string;
   total: number;
   poster: Post[];
+  endring_fra_saldert: EndringsData | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -51,6 +52,7 @@ export interface Programkategori {
   navn: string;
   total: number;
   kapitler: Kapittel[];
+  endring_fra_saldert: EndringsData | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -62,6 +64,7 @@ export interface Programomraade {
   navn: string;
   total: number;
   kategorier: Programkategori[];
+  endring_fra_saldert: EndringsData | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -71,6 +74,7 @@ export interface Programomraade {
 export interface BudgetSide {
   total: number;
   omraader: Programomraade[];
+  endring_fra_saldert: EndringsData | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,6 +147,9 @@ export interface AggregertKategori {
   farge: string;
   omr_nr?: number;
   omr_gruppe?: number[];
+  saldert_belop?: number | null;
+  endring_absolut?: number | null;
+  endring_prosent?: number | null;
 }
 
 export interface AggregertBudsjett {
@@ -238,8 +245,10 @@ export interface NumberFormatProps {
 }
 
 export interface ChangeIndicatorProps {
-  endring_absolut: number;
-  endring_prosent: number;
+  endring_absolut: number | null;
+  endring_prosent: number | null;
+  er_ny_post?: boolean;
+  side?: "utgift" | "inntekt";
   compact?: boolean;
 }
 
@@ -320,6 +329,27 @@ export interface HeroKonfigurasjon {
   undertittel?: string;
   nokkeltall: HeroNokkeltall[];
   bakgrunnsbilde?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Endringsvisning — metadata fra gul_bok_endringer.json
+// ---------------------------------------------------------------------------
+
+export interface EndringsMetadata {
+  budsjettaar: number;
+  saldert_kilde: string | null;
+  saldert_aar: number | null;
+  har_endringsdata: boolean;
+  endring_etikett: string | null;
+  statistikk: {
+    antall_poster_gb: number;
+    antall_med_match: number;
+    antall_nye_poster: number;
+    matchrate_prosent: number;
+    saldert_total_mrd: number;
+    gb_total_mrd: number;
+    endring_total_mrd: number;
+  } | null;
 }
 
 // ---------------------------------------------------------------------------

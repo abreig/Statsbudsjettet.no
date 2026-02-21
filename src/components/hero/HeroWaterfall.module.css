@@ -1,0 +1,104 @@
+.waterfall {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-6);
+  background: rgba(24, 28, 98, 0.03);
+  border-radius: var(--radius-lg);
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.totallinje {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  width: 100%;
+  justify-content: space-between;
+}
+
+.totallabel {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-xs);
+  font-weight: var(--vekt-medium);
+  color: var(--tekst-sekundaer);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.totalverdi {
+  font-family: var(--font-tall);
+  font-size: var(--tekst-lg);
+  font-weight: var(--vekt-bold);
+  color: var(--reg-marine);
+}
+
+.drivere {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--reg-lysgraa);
+  border-bottom: 1px solid var(--reg-lysgraa);
+}
+
+.driver {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.driverNavn {
+  font-family: var(--font-sans);
+  font-size: var(--tekst-xs);
+  color: var(--tekst-sekundaer);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.driverBarContainer {
+  display: flex;
+  align-items: center;
+  min-width: 16px;
+}
+
+.driverBarPositiv {
+  height: 14px;
+  background-color: var(--reg-blaa);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  opacity: 0.8;
+}
+
+.driverBarNegativ {
+  height: 14px;
+  background-color: var(--reg-korall);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  opacity: 0.7;
+}
+
+.driverVerdi {
+  font-family: var(--font-tall);
+  font-size: var(--tekst-xs);
+  font-weight: var(--vekt-semibold);
+  color: var(--reg-marine);
+  min-width: 60px;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .waterfall {
+    padding: var(--space-3) var(--space-4);
+    max-width: 100%;
+  }
+
+  .totalverdi {
+    font-size: var(--tekst-base);
+  }
+}

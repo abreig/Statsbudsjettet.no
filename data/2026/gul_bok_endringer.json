@@ -1,10 +1,16 @@
 {
   "budsjettaar": 2026,
-  "saldert_kilde": null,
-  "utgifter": {
-    "endringer": []
-  },
-  "inntekter": {
-    "endringer": []
+  "saldert_kilde": "Saldert budsjett 2025",
+  "saldert_aar": 2025,
+  "har_endringsdata": true,
+  "endring_etikett": "fra saldert budsjett 2025",
+  "statistikk": {
+    "antall_poster_gb": 1600,
+    "antall_med_match": 1519,
+    "antall_nye_poster": 81,
+    "matchrate_prosent": 94.9,
+    "saldert_total_mrd": 5723.7,
+    "gb_total_mrd": 5814.9,
+    "endring_total_mrd": 91.1
   }
 }

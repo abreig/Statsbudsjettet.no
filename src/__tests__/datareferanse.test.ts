@@ -14,18 +14,22 @@ const mockData: BudgetYear = {
         navn: "Forsvar",
         total: 110069526000,
         kategorier: [],
+        endring_fra_saldert: null,
       },
       {
         omr_nr: 10,
         navn: "Helse og omsorg",
         total: 248109015000,
         kategorier: [],
+        endring_fra_saldert: null,
       },
     ],
+    endring_fra_saldert: null,
   },
   inntekter: {
     total: 2796781829000,
     omraader: [],
+    endring_fra_saldert: null,
   },
   spu: {
     overfoering_til_fond: 642769100000,

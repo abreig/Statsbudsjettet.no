@@ -16,8 +16,14 @@ from berikelse import (
     beregn_spu, generer_aggregert_utgifter, generer_aggregert_inntekter,
     beregn_oljekorrigert, hent_manuelle_tall,
 )
+from endringsdata import les_saldert, beregn_endringsdata, valider_endringsdata, statistikk_endringsdata
 from eksporter import eksporter_full, eksporter_aggregert, eksporter_endringer, eksporter_metadata
 from valider import valider_json_filer
+
+# Mapping: budsjettår → saldert budsjett-fil (forrige års salderte budsjett)
+SALDERT_FILER: dict[int, str] = {
+    2026: "Saldert budsjett 2025.xlsx",
+}
 
 
 def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
@@ -34,6 +40,32 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
           f"{resultater['total_utgifter_kr'] / 1e9:.1f} mrd. kr")
     print(f"  Inntekter: {resultater['antall_inntektsposter']} poster, "
           f"{resultater['total_inntekter_kr'] / 1e9:.1f} mrd. kr")
+
+    # Steg 1b: Koble mot saldert budsjett (hvis tilgjengelig)
+    saldert_aar = None
+    endring_stat = None
+    saldert_filnavn = SALDERT_FILER.get(budsjettaar)
+    if saldert_filnavn:
+        saldert_fil = kildefil.parent / saldert_filnavn
+        if saldert_fil.exists():
+            print(f"\nSteg 1b: Endringsdata fra {saldert_filnavn}...")
+            saldert = les_saldert(saldert_fil)
+            saldert_aar = budsjettaar - 1
+            print(f"  Saldert budsjett: {len(saldert)} poster")
+
+            df = beregn_endringsdata(df, saldert)
+            endring_stat = statistikk_endringsdata(df)
+
+            advarsler = valider_endringsdata(df)
+            if advarsler:
+                for a in advarsler:
+                    print(f"  ⚠ {a}")
+            else:
+                print(f"  ✓ {endring_stat['antall_med_match']} av {endring_stat['antall_poster_gb']} poster matchet "
+                      f"({endring_stat['matchrate_prosent']:.1f} %)")
+                print(f"  Total endring: {endring_stat['endring_total_mrd']:.1f} mrd. kr")
+        else:
+            print(f"\n  (Saldert budsjett-fil {saldert_fil} finnes ikke, hopper over endringsdata)")
 
     # Steg 2-3: Hierarkisk aggregering
     print("\nSteg 2-3: Hierarkisk aggregering...")
@@ -89,7 +121,9 @@ def kjor_pipeline(kildefil: Path, budsjettaar: int, utmappe: Path) -> bool:
     f2 = eksporter_aggregert(utgifter_agg, inntekter_agg, spu, budsjettaar, utmappe)
     print(f"  → {f2} ({f2.stat().st_size / 1024:.1f} KB)")
 
-    f3 = eksporter_endringer(budsjettaar, utmappe)
+    f3 = eksporter_endringer(budsjettaar, utmappe,
+                             saldert_aar=saldert_aar,
+                             endring_statistikk=endring_stat)
     print(f"  → {f3} ({f3.stat().st_size / 1024:.1f} KB)")
 
     f4 = eksporter_metadata(
